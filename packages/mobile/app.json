@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "RoadMate",
+    "slug": "roadmate",
+    "version": "0.1.0",
+    "scheme": "roadmate",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.roadmate.app",
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"],
+        "NSLocationWhenInUseUsageDescription": "RoadMate uses your location to find people who need help near you.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "RoadMate shares your location while you are available to help, so people in trouble can find the nearest helper."
+      }
+    },
+    "android": {
+      "package": "com.roadmate.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      "expo-notifications",
+      "expo-task-manager"
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:3000"
+    }
+  }
+}

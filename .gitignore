@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.turbo/
+
+# Logs
+logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist
+dist-ssr
+
+# Expo
+.expo/
+*.tsbuildinfo
+
+# Native builds
+*.apk
+*.aab
+*.ipa
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+
+# Ansible
+infra/ansible/inventory/hosts.ini
+*.retry
+
+# IDE
+.idea/
+.vscode/settings.json
+*.sw?
+
+# OS
+.DS_Store
+
+# Coverage
+coverage
+
+# Claude
+.claude/

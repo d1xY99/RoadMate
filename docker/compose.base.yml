@@ -1,0 +1,56 @@
+---
+x-network: &network
+  networks:
+    - ${DOCKER_NETWORK:-roadmate_network}
+
+services:
+  # PostgreSQL with PostGIS — geo matching ("who is within N km")
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: roadmate-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-roadmate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-roadmate}
+      POSTGRES_DB: ${POSTGRES_DB:-roadmate}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - roadmate_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-roadmate}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    <<: *network
+
+  # Redis — live location cache + rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: roadmate-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - roadmate_redis:/data
+    <<: *network
+
+  # NATS (JetStream) — fan-out of push notifications to nearby helpers
+  nats:
+    image: nats:2-alpine
+    container_name: roadmate-nats
+    restart: unless-stopped
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "${NATS_PORT:-4222}:4222"
+      - "8222:8222"
+    <<: *network
+
+volumes:
+  roadmate_pgdata:
+  roadmate_redis:
+
+networks:
+  roadmate_network:
+    name: ${DOCKER_NETWORK:-roadmate_network}
+    driver: bridge

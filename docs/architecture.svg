@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1174 784" font-family="Helvetica, Arial, sans-serif">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 z" fill="#4d4d4d"/></marker></defs>
+<rect width="1174" height="784" fill="#ffffff"/>
+<line x1="327.6" y1="180.0" x2="454.1" y2="230.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="706.3" y1="180.0" x2="596.1" y2="230.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="470.0" y1="290.0" x2="330.0" y2="360.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="528.1" y1="290.0" x2="523.5" y2="360.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="216.6" y1="470.0" x2="212.2" y2="540.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="316.3" y1="470.0" x2="438.8" y2="540.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="340.0" y1="449.3" x2="700.0" y2="552.1" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="211.8" y1="470.0" x2="179.5" y2="685.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="297.9" y1="470.0" x2="602.5" y2="685.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="513.1" y1="470.0" x2="504.4" y2="540.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="785.5" y1="540.0" x2="796.4" y2="470.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="732.6" y1="470.0" x2="449.5" y2="685.0" stroke="#4d4d4d" stroke-width="1.5" marker-end="url(#arrow)"/>
+<line x1="430.3" y1="685.0" x2="771.3" y2="180.0" stroke="#b85450" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="268.2" y1="180.0" x2="841.0" y2="685.0" stroke="#4d4d4d" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<line x1="805.5" y1="180.0" x2="871.1" y2="685.0" stroke="#4d4d4d" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<text x="46.0" y="43.0" font-size="20" text-anchor="start" fill="#1a1a1a" font-weight="bold">RoadMate  System Architecture (MVP)</text>
+<rect x="60" y="70" width="900" height="120" rx="0" fill="none" stroke="#9aa0a6" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="510.0" y="87.0" font-size="11" text-anchor="middle" fill="#1a1a1a" font-style="italic">CLIENTS (Expo / React Native)</text>
+<rect x="110" y="95" width="220" height="85" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="120.0" y="109.5" font-size="12" text-anchor="start" fill="#1a1a1a">📱 Requester app</text>
+<text x="120.0" y="125.5" font-size="12" text-anchor="start" fill="#1a1a1a">(needs help)</text>
+<text x="120.0" y="141.5" font-size="12" text-anchor="start" fill="#1a1a1a">• create request</text>
+<text x="120.0" y="157.5" font-size="12" text-anchor="start" fill="#1a1a1a">• see helper on map</text>
+<text x="120.0" y="173.5" font-size="12" text-anchor="start" fill="#1a1a1a">• chat / call / track</text>
+<rect x="690" y="95" width="220" height="85" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.5"/>
+<text x="700.0" y="109.5" font-size="12" text-anchor="start" fill="#1a1a1a">📱 Helper app</text>
+<text x="700.0" y="125.5" font-size="12" text-anchor="start" fill="#1a1a1a">(available to help)</text>
+<text x="700.0" y="141.5" font-size="12" text-anchor="start" fill="#1a1a1a">• "Available" toggle</text>
+<text x="700.0" y="157.5" font-size="12" text-anchor="start" fill="#1a1a1a">• background location</text>
+<text x="700.0" y="173.5" font-size="12" text-anchor="start" fill="#1a1a1a">• receive push, offer help</text>
+<rect x="380" y="230" width="300" height="60" rx="8" fill="#ffe6cc" stroke="#d79b00" stroke-width="1.5"/>
+<text x="530.0" y="256.0" font-size="12" text-anchor="middle" fill="#1a1a1a">Caddy</text>
+<text x="530.0" y="272.0" font-size="12" text-anchor="middle" fill="#1a1a1a">(reverse proxy · automatic HTTPS/TLS)</text>
+<rect x="60" y="330" width="900" height="150" rx="0" fill="none" stroke="#82b366" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="510.0" y="347.0" font-size="11" text-anchor="middle" fill="#1a1a1a" font-style="italic">BACKEND — @roadmate/backend (Elysia · Bun · TypeScript)</text>
+<rect x="100" y="360" width="240" height="110" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+<text x="110.0" y="387.0" font-size="12" text-anchor="start" fill="#1a1a1a">REST API</text>
+<text x="110.0" y="403.0" font-size="12" text-anchor="start" fill="#1a1a1a">• auth (SMS / JWT)</text>
+<text x="110.0" y="419.0" font-size="12" text-anchor="start" fill="#1a1a1a">• users + vehicle + availability</text>
+<text x="110.0" y="435.0" font-size="12" text-anchor="start" fill="#1a1a1a">• help requests lifecycle</text>
+<text x="110.0" y="451.0" font-size="12" text-anchor="start" fill="#1a1a1a">• matching (PostGIS)</text>
+<rect x="420" y="360" width="200" height="110" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+<text x="430.0" y="387.0" font-size="12" text-anchor="start" fill="#1a1a1a">Realtime gateway</text>
+<text x="430.0" y="403.0" font-size="12" text-anchor="start" fill="#1a1a1a">(WebSocket)</text>
+<text x="430.0" y="419.0" font-size="12" text-anchor="start" fill="#1a1a1a">• live location stream</text>
+<text x="430.0" y="435.0" font-size="12" text-anchor="start" fill="#1a1a1a">• request status</text>
+<text x="430.0" y="451.0" font-size="12" text-anchor="start" fill="#1a1a1a">• chat</text>
+<rect x="700" y="360" width="210" height="110" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.5"/>
+<text x="710.0" y="395.0" font-size="12" text-anchor="start" fill="#1a1a1a">Push worker</text>
+<text x="710.0" y="411.0" font-size="12" text-anchor="start" fill="#1a1a1a">• consumes NATS</text>
+<text x="710.0" y="427.0" font-size="12" text-anchor="start" fill="#1a1a1a">• builds Expo push</text>
+<text x="710.0" y="443.0" font-size="12" text-anchor="start" fill="#1a1a1a">• fan-out to nearby helpers</text>
+<rect x="60" y="520" width="900" height="100" rx="0" fill="none" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="510.0" y="537.0" font-size="11" text-anchor="middle" fill="#1a1a1a" font-style="italic">DATA</text>
+<path d="M110,548 A100,8 0 0 1 310,548 L310,602 A100,8 0 0 1 110,602 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+<path d="M110,548 A100,8 0 0 0 310,548" fill="none" stroke="#d6b656" stroke-width="1.5"/>
+<text x="210.0" y="555.0" font-size="12" text-anchor="middle" fill="#1a1a1a">PostgreSQL + PostGIS</text>
+<text x="210.0" y="571.0" font-size="12" text-anchor="middle" fill="#1a1a1a">users · requests · offers</text>
+<text x="210.0" y="587.0" font-size="12" text-anchor="middle" fill="#1a1a1a">feedback · reports</text>
+<text x="210.0" y="603.0" font-size="12" text-anchor="middle" fill="#1a1a1a">(GiST geo index)</text>
+<path d="M420,548 A80,8 0 0 1 580,548 L580,602 A80,8 0 0 1 420,602 Z" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+<path d="M420,548 A80,8 0 0 0 580,548" fill="none" stroke="#d6b656" stroke-width="1.5"/>
+<text x="500.0" y="563.0" font-size="12" text-anchor="middle" fill="#1a1a1a">Redis</text>
+<text x="500.0" y="579.0" font-size="12" text-anchor="middle" fill="#1a1a1a">live location cache</text>
+<text x="500.0" y="595.0" font-size="12" text-anchor="middle" fill="#1a1a1a">rate limiting</text>
+<rect x="700" y="540" width="160" height="70" rx="8" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+<text x="780.0" y="571.0" font-size="12" text-anchor="middle" fill="#1a1a1a">NATS (JetStream)</text>
+<text x="780.0" y="587.0" font-size="12" text-anchor="middle" fill="#1a1a1a">push fan-out queue</text>
+<rect x="60" y="660" width="1050" height="100" rx="0" fill="none" stroke="#b85450" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="585.0" y="677.0" font-size="11" text-anchor="middle" fill="#1a1a1a" font-style="italic">EXTERNAL SERVICES</text>
+<rect x="90" y="685" width="170" height="60" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+<text x="175.0" y="703.0" font-size="12" text-anchor="middle" fill="#1a1a1a">Supabase</text>
+<text x="175.0" y="719.0" font-size="12" text-anchor="middle" fill="#1a1a1a">auth helpers + storage</text>
+<text x="175.0" y="735.0" font-size="12" text-anchor="middle" fill="#1a1a1a">(profile photos)</text>
+<rect x="320" y="685" width="180" height="60" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+<text x="410.0" y="711.0" font-size="12" text-anchor="middle" fill="#1a1a1a">Expo Push</text>
+<text x="410.0" y="727.0" font-size="12" text-anchor="middle" fill="#1a1a1a">→ APNs / FCM</text>
+<rect x="560" y="685" width="170" height="60" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+<text x="645.0" y="703.0" font-size="12" text-anchor="middle" fill="#1a1a1a">SMS provider</text>
+<text x="645.0" y="719.0" font-size="12" text-anchor="middle" fill="#1a1a1a">(Infobip / Twilio)</text>
+<text x="645.0" y="735.0" font-size="12" text-anchor="middle" fill="#1a1a1a">phone verification</text>
+<rect x="790" y="685" width="170" height="60" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+<text x="875.0" y="711.0" font-size="12" text-anchor="middle" fill="#1a1a1a">Map tiles</text>
+<text x="875.0" y="727.0" font-size="12" text-anchor="middle" fill="#1a1a1a">(MapLibre / Mapbox)</text>
+<rect x="980" y="360" width="170" height="110" rx="8" fill="#e1d5e7" stroke="#9673a6" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="990.0" y="395.0" font-size="12" text-anchor="start" fill="#1a1a1a">INFRA (infra/)</text>
+<text x="990.0" y="411.0" font-size="12" text-anchor="start" fill="#1a1a1a">Terraform → Hetzner VPS</text>
+<text x="990.0" y="427.0" font-size="12" text-anchor="start" fill="#1a1a1a">Ansible → docker + Caddy + firewall</text>
+<text x="990.0" y="443.0" font-size="12" text-anchor="start" fill="#1a1a1a">dbmate → migrations</text>
+<text x="345.0" y="213.0" font-size="10" text-anchor="middle" fill="#1a1a1a">HTTPS / WSS</text>
+<text x="190.0" y="513.0" font-size="10" text-anchor="middle" fill="#1a1a1a" font-style="italic">ST_DWithin</text>
+<text x="655.0" y="513.0" font-size="10" text-anchor="middle" fill="#1a1a1a" font-style="italic">publish match</text>
+<text x="520.0" y="653.0" font-size="10" text-anchor="middle" fill="#b85450" font-style="italic">push notification</text>
+</svg>

@@ -1,0 +1,34 @@
+---
+include:
+  - ./compose.base.yml
+
+x-network: &network
+  networks:
+    - ${DOCKER_NETWORK:-roadmate_network}
+
+services:
+  db-migrate:
+    image: ghcr.io/amacneil/dbmate:2
+    container_name: roadmate-db-migrate
+    env_file: ../packages/backend/.env
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        dbmate \
+          --migrations-dir /migrations \
+          --no-dump-schema \
+          --wait \
+          --wait-timeout 30s \
+          --url $$DB_URL?sslmode=disable \
+          up
+    volumes:
+      - "../packages/backend/migrations:/migrations:ro"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    <<: *network
+
+networks:
+  roadmate_network:
+    name: ${DOCKER_NETWORK:-roadmate_network}
+    driver: bridge

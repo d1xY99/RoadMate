@@ -1,0 +1,44 @@
+---
+# Deploy / update the RoadMate backend on the host.
+# Assumes the API image is built in CI and pushed to a registry (ghcr.io).
+- name: Deploy RoadMate API
+  hosts: api
+  become: true
+
+  vars:
+    app_dir: /opt/roadmate
+    image: "ghcr.io/your-org/roadmate-backend:latest"
+
+  tasks:
+    - name: Ensure app dir exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy compose file
+      ansible.builtin.copy:
+        src: ../../../docker/compose.base.yml
+        dest: "{{ app_dir }}/compose.base.yml"
+        mode: "0644"
+
+    - name: Copy .env (from vault / local — do not commit)
+      ansible.builtin.copy:
+        src: files/production.env
+        dest: "{{ app_dir }}/.env"
+        mode: "0600"
+
+    - name: Pull latest API image
+      community.docker.docker_image:
+        name: "{{ image }}"
+        source: pull
+
+    - name: Run DB migrations (dbmate)
+      ansible.builtin.shell: >
+        docker run --rm --env-file {{ app_dir }}/.env
+        -v {{ app_dir }}/migrations:/migrations
+        ghcr.io/amacneil/dbmate:2
+        --migrations-dir /migrations up
+
+    - name: Restart stack
+      ansible.builtin.shell: docker compose -f {{ app_dir }}/compose.base.yml up -d
