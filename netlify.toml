@@ -1,0 +1,16 @@
+# Netlify deploy for the web frontend (packages/web) from this Bun monorepo.
+# In the Netlify UI, leave "Base directory" empty (repo root) — these settings
+# build only the @roadmate/web workspace and publish its dist/.
+[build]
+  command = "bun install && bun run --filter @roadmate/web build"
+  publish = "packages/web/dist"
+
+[build.environment]
+  # Netlify auto-detects Bun from bun.lock; pin Node for any tooling that needs it.
+  NODE_VERSION = "20"
+
+# SPA fallback so client-side routes resolve to index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

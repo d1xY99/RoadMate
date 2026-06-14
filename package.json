@@ -19,6 +19,7 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "dev:web": "cd packages/web && bun run dev",
     "dev:backend": "cd packages/backend && bun run dev",
     "dev:mobile": "cd packages/mobile && bun run start",
     "up": "cd packages/backend && bun run docker:up",

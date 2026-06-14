@@ -15,7 +15,8 @@
       "!**/.expo",
       "!**/coverage",
       "!**/*.min.js",
-      "!**/*.svg"
+      "!**/*.svg",
+      "!**/*.css"
     ]
   },
   "formatter": {
