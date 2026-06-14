@@ -68,20 +68,33 @@ bun run db:rollback      # dbmate down (revert last, to test reversibility)
 bun run db:status        # show applied / pending
 ```
 
-**Migrations reach production ONLY by merging to `main`.** A laptop never writes
-to prod. The flow:
+**Migrations reach a remote DB ONLY via CI.** A laptop never writes to staging
+or prod. The flow:
 
 1. Add a migration locally; verify with `db:migrate` and `db:rollback`.
 2. Open a PR → CI (`db-validate`) applies it up→down→up on a throwaway Supabase.
-3. Merge to `main` → CI (`db-deploy`) runs `dbmate up` against production.
+3. Push/merge to **`staging`** → CI (`db-deploy`) runs `dbmate up` against staging.
+4. Merge to **`main`** → CI (`db-deploy`) runs `dbmate up` against production.
 
-Required GitHub Actions **secrets**, in an environment named `production`
-(Repo → Settings → Environments → `production`):
+Required GitHub Actions **secrets**, split across two environments
+(Repo → Settings → Environments):
+
+**`production`** environment:
 
 | Secret | Value |
 |--------|-------|
-| `SUPABASE_PRODUCTION_PROJECT_REF` | the project ref (e.g. `ffqkwegpdtriypbumfss`) |
-| `SUPABASE_PRODUCTION_DB_PASSWORD` | the production database password |
+| `SUPABASE_PRODUCTION_PROJECT_REF` | the prod project ref (e.g. `ffqkwegpdtriypbumfss`) |
+| `SUPABASE_PRODUCTION_DB_PASSWORD` | the prod database password |
+
+**`staging`** environment:
+
+| Secret | Value |
+|--------|-------|
+| `SUPABASE_STAGING_DB_URL` | full session-pooler connection string from the staging project (Connect → Session pooler) |
+
+> Netlify env vars (the public `VITE_SUPABASE_*` keys) are configured separately
+> in the Netlify UI, scoped by deploy context (Production → prod, Deploy
+> Previews/Branch deploys → staging) — they are **not** GitHub secrets.
 
 > `db-deploy` builds the production connection string from these two secrets.
 > (A `SUPABASE_ACCESS_TOKEN` is no longer required — dbmate connects directly.)
