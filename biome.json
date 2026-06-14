@@ -14,7 +14,8 @@
       "!**/build",
       "!**/.expo",
       "!**/coverage",
-      "!**/*.min.js"
+      "!**/*.min.js",
+      "!**/*.svg"
     ]
   },
   "formatter": {
@@ -27,7 +28,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   },
   "javascript": {
