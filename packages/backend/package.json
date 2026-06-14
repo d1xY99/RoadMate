@@ -11,13 +11,6 @@
     "lint": "biome check .",
     "fix": "biome check --write .",
     "test": "bun test",
-    "db:migrate": "bunx dbmate --migrations-dir ./migrations --url $DB_URL up",
-    "db:rollback": "bunx dbmate --migrations-dir ./migrations --url $DB_URL down",
-    "db:status": "bunx dbmate --migrations-dir ./migrations --url $DB_URL status",
-    "db:new": "bunx dbmate --migrations-dir ./migrations new",
-    "supabase": "supabase",
-    "supabase:start": "supabase start",
-    "supabase:stop": "supabase stop",
     "docker:up": "docker compose -f ../../docker/compose.yml up -d",
     "docker:down": "docker compose -f ../../docker/compose.yml down"
   },
@@ -40,8 +33,6 @@
     "@biomejs/biome": "catalog:",
     "@types/jsonwebtoken": "^9.0.10",
     "bun-types": "latest",
-    "dbmate": "^2.0.0",
-    "supabase": "^2.23.4",
     "typescript": "~5.7.2"
   }
 }
