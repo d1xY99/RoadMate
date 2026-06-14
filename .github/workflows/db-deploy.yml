@@ -1,0 +1,37 @@
+name: Deploy DB migrations
+
+# Migrations reach production ONLY here — on merge to main. Never from a laptop.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/backend/migrations/**'
+      - '.github/workflows/db-deploy.yml'
+
+concurrency:
+  group: db-deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      PROJECT_REF: ${{ secrets.SUPABASE_PRODUCTION_PROJECT_REF }}
+      DB_PASSWORD: ${{ secrets.SUPABASE_PRODUCTION_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+
+      - run: bun install --frozen-lockfile
+
+      - name: Apply pending migrations to production (dbmate up)
+        run: |
+          # Build the prod connection string from secrets. The password is
+          # URL-encoded (jq @uri) so special chars like ! survive.
+          ENC_PW=$(jq -rn --arg x "$DB_PASSWORD" '$x|@uri')
+          PROD_URL="postgresql://postgres.${PROJECT_REF}:${ENC_PW}@aws-1-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require"
+          bunx dbmate --migrations-dir ./packages/backend/migrations --no-dump-schema --url "$PROD_URL" up

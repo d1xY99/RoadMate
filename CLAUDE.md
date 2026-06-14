@@ -20,20 +20,30 @@ RoadMate/
 │   ├── terraform/          # Hetzner VPS provisioning
 │   ├── ansible/            # provisioning + deploy playbooks
 │   └── scripts/            # bootstrap / ops helpers
+├── supabase/              # Supabase project: config.toml + migrations/ (the DB)
 └── packages/
-    ├── shared/             # @roadmate/shared — types & API contracts (zod)
-    ├── backend/            # @roadmate/backend — Elysia + Bun, Supabase, PostGIS
-    └── mobile/             # @roadmate/mobile — Expo (React Native) app
+    ├── web/               # @roadmate/web — MVP frontend (Vite + React), active
+    ├── shared/            # @roadmate/shared — types & API contracts (zod)
+    ├── backend/           # @roadmate/backend — Elysia + Bun (parked for later)
+    └── mobile/            # @roadmate/mobile — Expo (React Native) (parked)
 ```
 
 ## Quick start
 
 ```bash
 bun install          # install all workspaces
-bun run up           # start infra (postgres+postgis, redis, nats) via docker
-bun run db:migrate   # run migrations (dbmate)
-bun run dev          # run all packages in dev (via Turbo)
+bun run db:start     # local Supabase (Postgres+PostGIS, Auth, Studio); applies migrations
+bun run dev:web      # web app -> http://localhost:5173
 ```
+
+## Database / migrations
+
+- The DB is **Supabase**; `bun run db:start` runs a local Supabase stack.
+- Migrations are **dbmate** files (reversible up/down) in
+  `packages/backend/migrations`. Apply locally with `bun run db:migrate`
+  (against local Supabase only) and revert with `bun run db:rollback`.
+- Migrations reach **production ONLY via CI on merge to `main`**
+  (`.github/workflows/db-deploy.yml`). Never apply to prod from a laptop.
 
 ## Conventions (inherited from hydra-stack)
 

@@ -22,27 +22,69 @@
 ### Prerequisites
 
 - [Bun](https://bun.sh) ≥ 1.3
-- A free [Supabase](https://supabase.com) project (region: **Frankfurt / eu-central**)
-  — from **Settings → API** copy the *Project URL* and *anon public key*.
+- [Docker](https://www.docker.com) (for the local Supabase stack)
+- [Supabase CLI](https://supabase.com/docs/guides/cli) (installed as a dev dep)
 
-### Run the web app
+> Everything runs against a **local Supabase** on your machine. You never need
+> the cloud project to develop. Production migrations are applied by CI only
+> (see *Database migrations* below).
+
+### Run it locally
 
 ```bash
 # 1. Install all workspace dependencies
 bun install
 
-# 2. Point the web app at your Supabase project
-cp packages/web/.env.example packages/web/.env
-#    then edit packages/web/.env and fill in:
-#      VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
-#      VITE_SUPABASE_ANON_KEY=your-anon-public-key
+# 2. Start the local Supabase stack (Postgres+PostGIS, Auth, Studio, ...)
+bun run db:start         # prints local API URL + keys
+#    Local Studio:  http://127.0.0.1:54423
 
-# 3. Start the dev server
+# 3. Apply the migrations to the local DB
+bun run db:migrate       # dbmate up (against local Supabase only)
+
+# 4. Point the web app at the LOCAL Supabase
+cp packages/web/.env.example packages/web/.env
+#    fill VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY from the db:start output
+
+# 5. Start the web dev server
 bun run dev:web          # http://localhost:5173
+
+bun run db:stop          # stop the local stack when done
 ```
 
-The app runs even before Supabase is configured (it just warns in the console),
-so you can see the UI immediately.
+> Ports are shifted to the 544xx range (see `supabase/config.toml`) so this can
+> run alongside another local Supabase project.
+
+### Database migrations
+
+Migrations are **dbmate** files (reversible `-- migrate:up` / `-- migrate:down`)
+in `packages/backend/migrations`, applied **only against the local Supabase**:
+
+```bash
+bun run db:new <name>    # scaffold a new migration (up/down skeleton)
+# ...edit the SQL...
+bun run db:migrate       # dbmate up   (apply to local)
+bun run db:rollback      # dbmate down (revert last, to test reversibility)
+bun run db:status        # show applied / pending
+```
+
+**Migrations reach production ONLY by merging to `main`.** A laptop never writes
+to prod. The flow:
+
+1. Add a migration locally; verify with `db:migrate` and `db:rollback`.
+2. Open a PR → CI (`db-validate`) applies it up→down→up on a throwaway Supabase.
+3. Merge to `main` → CI (`db-deploy`) runs `dbmate up` against production.
+
+Required GitHub Actions **secrets**, in an environment named `production`
+(Repo → Settings → Environments → `production`):
+
+| Secret | Value |
+|--------|-------|
+| `SUPABASE_PRODUCTION_PROJECT_REF` | the project ref (e.g. `ffqkwegpdtriypbumfss`) |
+| `SUPABASE_PRODUCTION_DB_PASSWORD` | the production database password |
+
+> `db-deploy` builds the production connection string from these two secrets.
+> (A `SUPABASE_ACCESS_TOKEN` is no longer required — dbmate connects directly.)
 
 ### Quality checks (same as CI)
 
@@ -58,16 +100,6 @@ bun run test        # bun test
 cd packages/web
 bun run build        # production build -> dist/
 bun run preview      # serve the production build locally
-```
-
-### (Optional) parked backend
-
-Only needed if/when you work on the custom Elysia backend instead of Supabase:
-
-```bash
-bun run up           # docker: postgres+postgis, redis, nats
-bun run db:migrate   # apply migrations (dbmate)
-bun run dev:backend  # Elysia API in watch mode
 ```
 
 
