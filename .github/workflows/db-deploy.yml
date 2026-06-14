@@ -4,11 +4,12 @@ name: Deploy DB migrations
 #   push to `staging` -> staging Supabase
 #   push to `main`    -> production Supabase
 on:
+  workflow_dispatch: # allow manual runs from the Actions tab
   push:
     branches: [main, staging]
-    paths:
-      - 'packages/backend/migrations/**'
-      - '.github/workflows/db-deploy.yml'
+    # No path filter: dbmate up is idempotent (applies only pending migrations),
+    # so it's safe to run on every push — and it reliably triggers on a brand-new
+    # branch identical to main (a path filter would skip that case).
 
 concurrency:
   group: db-deploy-${{ github.ref_name }}
