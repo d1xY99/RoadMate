@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'bun:test';
-import { app } from './server';
+import { createAuthServiceMock } from '../auth/service.mock';
+import { createServer } from '../server';
+import { createUserServiceMock } from '../users/service.mock';
+
+const app = createServer({
+  authService: createAuthServiceMock(),
+  userService: createUserServiceMock(),
+});
 
 describe('server', () => {
   it('GET /health returns ok', async () => {

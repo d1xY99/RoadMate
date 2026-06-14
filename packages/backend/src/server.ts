@@ -1,20 +1,22 @@
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
+import { createAuthHandler } from './auth/handler';
+import type { AuthService } from './auth/service';
+import { createUserHandler } from './users/handler';
+import type { UserService } from './users/service';
 
-// Feature route modules live next to their domain (auth/, users/, requests/...).
-// They are mounted here as they get implemented.
-//
-//   import { authRoutes } from './auth';
-//   import { userRoutes } from './users';
-//   import { requestRoutes } from './requests';
+export type ServerDeps = {
+  authService: AuthService;
+  userService: UserService;
+};
 
-export const app = new Elysia()
-  .use(cors())
-  .use(swagger({ path: '/docs' }))
-  .get('/health', () => ({ status: 'ok', service: 'roadmate-backend' }));
-// .use(authRoutes)
-// .use(userRoutes)
-// .use(requestRoutes);
+export const createServer = (deps: ServerDeps) =>
+  new Elysia()
+    .use(cors())
+    .use(swagger({ path: '/docs' }))
+    .get('/health', () => ({ status: 'ok', service: 'roadmate-backend' }))
+    .use(createAuthHandler(deps.authService))
+    .use(createUserHandler(deps.userService));
 
-export type App = typeof app;
+export type Server = ReturnType<typeof createServer>;
