@@ -1,15 +1,9 @@
 name: Deploy DB migrations
 
-# Migrations reach a remote DB ONLY here — never from a laptop.
-#   push to `staging` -> staging Supabase
-#   push to `main`    -> production Supabase
 on:
-  workflow_dispatch: # allow manual runs from the Actions tab
+  workflow_dispatch: 
   push:
     branches: [main, staging]
-    # No path filter: dbmate up is idempotent (applies only pending migrations),
-    # so it's safe to run on every push — and it reliably triggers on a brand-new
-    # branch identical to main (a path filter would skip that case).
 
 concurrency:
   group: db-deploy-${{ github.ref_name }}
@@ -18,7 +12,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # main -> `production` environment, staging -> `staging` environment.
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     steps:
       - uses: actions/checkout@v4
@@ -32,10 +25,8 @@ jobs:
       - name: Apply pending migrations (dbmate up)
         env:
           REF_NAME: ${{ github.ref_name }}
-          # production (main): URL is built from these two secrets
           PROD_REF: ${{ secrets.SUPABASE_PRODUCTION_PROJECT_REF }}
           PROD_PW: ${{ secrets.SUPABASE_PRODUCTION_DB_PASSWORD }}
-          # staging: full connection string secret
           STAGING_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
         run: |
           if [ "$REF_NAME" = "main" ]; then

@@ -1,8 +1,5 @@
 name: Validate DB migrations
 
-# On every PR that touches migrations: spin up a throwaway local Supabase
-# (gives us the auth schema the migration depends on) and apply the migration
-# up → down → up to prove it's valid AND reversible before it can reach main.
 on:
   pull_request:
     paths:
