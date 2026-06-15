@@ -7,7 +7,8 @@ export interface SignUpResult {
   userId?: string;
 }
 
-export type SignInResult =
+// Returned by sign-in and refresh (both yield a full session).
+export type SessionResult =
   | {
       success: true;
       message: string;
@@ -62,7 +63,7 @@ export const createAuthService = (deps: {
   const signIn = async (
     email: string,
     password: string,
-  ): Promise<SignInResult> => {
+  ): Promise<SessionResult> => {
     const { data, error } = await anonClient.auth.signInWithPassword({
       email,
       password,
@@ -85,6 +86,30 @@ export const createAuthService = (deps: {
     };
   };
 
+  // Exchange a refresh token for a fresh session (new access + refresh tokens).
+  const refresh = async (refreshToken: string): Promise<SessionResult> => {
+    const { data, error } = await anonClient.auth.refreshSession({
+      refresh_token: refreshToken,
+    });
+
+    if (error || !data.session || !data.user) {
+      return {
+        success: false,
+        message: error?.message ?? 'Invalid or expired refresh token.',
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Session refreshed.',
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      expiresAt: data.session.expires_at,
+      user: { id: data.user.id, email: data.user.email },
+    };
+  };
+
+  // Revokes the session for the given access token (service-role admin API).
   const signOut = async (accessToken: string): Promise<SignOutResult> => {
     const { error } = await serviceClient.auth.admin.signOut(accessToken);
     if (error) {
@@ -93,7 +118,7 @@ export const createAuthService = (deps: {
     return { success: true, message: 'Signed out.' };
   };
 
-  return { signUp, signIn, signOut };
+  return { signUp, signIn, refresh, signOut };
 };
 
 export type AuthService = ReturnType<typeof createAuthService>;

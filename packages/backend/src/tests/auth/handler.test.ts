@@ -65,6 +65,24 @@ describe('auth handler — POST /auth/sign-in', () => {
   });
 });
 
+describe('auth handler — POST /auth/refresh', () => {
+  it('returns new session tokens for a valid refresh token', async () => {
+    const res = await post('/auth/refresh', { refreshToken: 'some-refresh' });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      success: boolean;
+      accessToken: string;
+    };
+    expect(body.success).toBe(true);
+    expect(body.accessToken).toBe('mock-access-token');
+  });
+
+  it('rejects a missing refresh token (422)', async () => {
+    const res = await post('/auth/refresh', {});
+    expect(res.status).toBe(422);
+  });
+});
+
 describe('auth handler — POST /auth/sign-out', () => {
   it('returns 401 without a Bearer token', async () => {
     const res = await post('/auth/sign-out');

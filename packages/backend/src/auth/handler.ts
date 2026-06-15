@@ -1,6 +1,24 @@
 import { Elysia, t } from 'elysia';
 import type { AuthService } from './service';
 
+// Shared shape for endpoints that return a session (sign-in, refresh).
+const sessionResponse = t.Object({
+  success: t.Boolean(),
+  message: t.String(),
+  accessToken: t.String(),
+  refreshToken: t.String(),
+  expiresAt: t.Optional(t.Number()),
+  user: t.Object({
+    id: t.String(),
+    email: t.Optional(t.String()),
+  }),
+});
+
+const messageResponse = t.Object({
+  success: t.Boolean(),
+  message: t.String(),
+});
+
 export const createAuthHandler = (service: AuthService) =>
   new Elysia({ prefix: '/auth' })
     .post(
@@ -60,27 +78,32 @@ export const createAuthHandler = (service: AuthService) =>
           email: t.String({ format: 'email' }),
           password: t.String({ minLength: 8 }),
         }),
-        response: {
-          200: t.Object({
-            success: t.Boolean(),
-            message: t.String(),
-            accessToken: t.String(),
-            refreshToken: t.String(),
-            expiresAt: t.Optional(t.Number()),
-            user: t.Object({
-              id: t.String(),
-              email: t.Optional(t.String()),
-            }),
-          }),
-          400: t.Object({
-            success: t.Boolean(),
-            message: t.String(),
-          }),
-        },
+        response: { 200: sessionResponse, 400: messageResponse },
         detail: {
           tags: ['Authentication'],
           description:
             'Sign in with email + password (via Supabase). Returns the session tokens.',
+        },
+      },
+    )
+    .post(
+      '/refresh',
+      async ({ body, status }) => {
+        const result = await service.refresh(body.refreshToken);
+        if (!result.success) {
+          return status(400, { success: false, message: result.message });
+        }
+        return result;
+      },
+      {
+        body: t.Object({
+          refreshToken: t.String({ minLength: 1 }),
+        }),
+        response: { 200: sessionResponse, 400: messageResponse },
+        detail: {
+          tags: ['Authentication'],
+          description:
+            'Refresh the session using a refresh token. Returns new session tokens.',
         },
       },
     )
@@ -103,9 +126,9 @@ export const createAuthHandler = (service: AuthService) =>
       },
       {
         response: {
-          200: t.Object({ success: t.Boolean(), message: t.String() }),
-          400: t.Object({ success: t.Boolean(), message: t.String() }),
-          401: t.Object({ success: t.Boolean(), message: t.String() }),
+          200: messageResponse,
+          400: messageResponse,
+          401: messageResponse,
         },
         detail: {
           tags: ['Authentication'],
