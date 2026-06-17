@@ -14,7 +14,7 @@ const serviceClient = createSupabaseServiceClient(
   env.supabaseServiceKey,
 );
 
-const authService = createAuthService({ anonClient });
+const authService = createAuthService({ anonClient, serviceClient });
 const userService = createUserService({ serviceClient });
 
 const app = createServer({ authService, userService });
