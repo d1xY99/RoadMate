@@ -1,6 +1,5 @@
 -- migrate:up
 
--- profiles: 1:1 with auth.users. Auto-created on signup by a trigger.
 create extension if not exists postgis;
 
 create table public.profiles (
@@ -22,8 +21,6 @@ create index profiles_location_idx on public.profiles using gist (current_locati
 create index profiles_available_idx on public.profiles (is_available)
   where is_available = true;
 
--- RLS: anyone authenticated can read profiles (needed to show helpers);
--- a user can insert/update only their own row.
 alter table public.profiles enable row level security;
 
 create policy profiles_select on public.profiles
@@ -34,7 +31,6 @@ create policy profiles_update on public.profiles
   for update to authenticated
   using (id = auth.uid()) with check (id = auth.uid());
 
--- Auto-create a profile row when a new auth user signs up.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
