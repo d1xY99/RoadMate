@@ -1,7 +1,5 @@
 -- migrate:up
 
--- Current user's role names (not gated — the client uses this to decide whether
--- to show the admin UI).
 create or replace function public.current_user_roles()
 returns text[]
 language sql
@@ -14,7 +12,6 @@ as $$
   where ur.user_id = auth.uid();
 $$;
 
--- Admin: list all users (profiles) with their roles. Gated on users.read.
 create or replace function public.admin_list_users()
 returns table (
   id uuid,
@@ -44,7 +41,6 @@ as $$
   group by p.id;
 $$;
 
--- Admin: list roles with their permission count. Gated on roles.manage.
 create or replace function public.admin_list_roles()
 returns table (name text, description text, permission_count bigint)
 language sql
@@ -59,7 +55,6 @@ as $$
   group by r.name, r.description;
 $$;
 
--- Admin: list permissions. Gated on roles.manage.
 create or replace function public.admin_list_permissions()
 returns table (name text, description text)
 language sql
