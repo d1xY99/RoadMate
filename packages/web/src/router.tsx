@@ -5,8 +5,9 @@ import {
   Outlet,
 } from '@tanstack/react-router';
 import { Home } from '@/pages/Home';
+import { Login } from '@/pages/Login';
+import { Register } from '@/pages/Register';
 
-// Code-based routes (no file-based codegen) so typecheck works out of the box.
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
 
 const indexRoute = createRoute({
@@ -15,7 +16,23 @@ const indexRoute = createRoute({
   component: Home,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: Login,
+});
+
+const registerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/register',
+  component: Register,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  loginRoute,
+  registerRoute,
+]);
 
 export const router = createRouter({ routeTree });
 
