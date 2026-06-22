@@ -2,13 +2,10 @@ import maplibregl from 'maplibre-gl';
 import { useEffect, useRef } from 'react';
 
 type Props = {
-  center?: [number, number]; // [lng, lat]
+  center?: [number, number];
   zoom?: number;
 };
 
-// Vanilla MapLibre wrapped in a React component (no react-map-gl dependency,
-// avoids React 19 peer issues). Free demo tiles for now — swap the style URL
-// for a real provider (MapTiler / Mapbox) later.
 export function MapView({ center = [15.98, 45.81], zoom = 12 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
