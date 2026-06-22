@@ -27,7 +27,8 @@ export function Login() {
       setError(err);
       return;
     }
-    navigate({ to: '/' });
+    const admin = useAuth.getState().roles.includes('admin');
+    navigate({ to: admin ? '/admin-dashboard' : '/' });
   };
 
   return (

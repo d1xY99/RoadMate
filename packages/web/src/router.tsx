@@ -4,6 +4,7 @@ import {
   createRouter,
   Outlet,
 } from '@tanstack/react-router';
+import { AdminDashboard } from '@/pages/AdminDashboard';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
@@ -28,10 +29,17 @@ const registerRoute = createRoute({
   component: Register,
 });
 
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin-dashboard',
+  component: AdminDashboard,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
+  adminRoute,
 ]);
 
 export const router = createRouter({ routeTree });
