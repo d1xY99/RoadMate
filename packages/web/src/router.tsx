@@ -7,6 +7,7 @@ import {
 import { AdminDashboard } from '@/pages/AdminDashboard';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
+import { Profile } from '@/pages/Profile';
 import { Register } from '@/pages/Register';
 
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
@@ -35,11 +36,18 @@ const adminRoute = createRoute({
   component: AdminDashboard,
 });
 
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/profile',
+  component: Profile,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
   adminRoute,
+  profileRoute,
 ]);
 
 export const router = createRouter({ routeTree });
