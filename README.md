@@ -68,13 +68,17 @@ bun run db:rollback      # dbmate down (revert last, to test reversibility)
 bun run db:status        # show applied / pending
 ```
 
-**Migrations reach a remote DB ONLY via CI.** A laptop never writes to staging
-or prod. The flow:
+**Migrations + web reach a remote env ONLY via CI.** A laptop never writes to
+staging or prod. The flow:
 
 1. Add a migration locally; verify with `db:migrate` and `db:rollback`.
 2. Open a PR → CI (`db-validate`) applies it up→down→up on a throwaway Supabase.
-3. Push/merge to **`staging`** → CI (`db-deploy`) runs `dbmate up` against staging.
-4. Merge to **`main`** → CI (`db-deploy`) runs `dbmate up` against production.
+3. Push/merge to **`staging`** → CI **`deploy`** runs DB migration + Netlify build (staging).
+4. Merge to **`main`** → CI **`deploy`** runs DB migration + Netlify build (production).
+5. Or run **`deploy`** manually (Actions tab → Run workflow → pick environment).
+
+The single **`deploy`** workflow handles one environment per run: it applies the
+DB migration and triggers the matching Netlify build.
 
 Required GitHub Actions **secrets**, split across two environments
 (Repo → Settings → Environments):
@@ -85,16 +89,21 @@ Required GitHub Actions **secrets**, split across two environments
 |--------|-------|
 | `SUPABASE_PRODUCTION_PROJECT_REF` | the prod project ref (e.g. `ffqkwegpdtriypbumfss`) |
 | `SUPABASE_PRODUCTION_DB_PASSWORD` | the prod database password |
+| `NETLIFY_PRODUCTION_BUILD_HOOK` | Netlify build hook URL that builds `main` |
 
 **`staging`** environment:
 
 | Secret | Value |
 |--------|-------|
-| `SUPABASE_STAGING_DB_URL` | full session-pooler connection string from the staging project (Connect → Session pooler) |
+| `SUPABASE_STAGING_DB_URL` | full session-pooler connection string (staging Connect → Session pooler) |
+| `NETLIFY_STAGING_BUILD_HOOK` | Netlify build hook URL that builds the `staging` branch |
 
-> Netlify env vars (the public `VITE_SUPABASE_*` keys) are configured separately
-> in the Netlify UI, scoped by deploy context (Production → prod, Deploy
-> Previews/Branch deploys → staging) — they are **not** GitHub secrets.
+> Build hooks: Netlify → Site config → Build & deploy → **Build hooks** → create
+> one per environment (set the branch it builds), copy the URL into the secret.
+> Disable Netlify's automatic git deploys if you want CI to be the only trigger.
+>
+> Netlify env vars (public `VITE_SUPABASE_*` keys) stay in the Netlify UI, scoped
+> by deploy context (Production → prod, Deploy Previews/Branch → staging).
 
 > `db-deploy` builds the production connection string from these two secrets.
 > (A `SUPABASE_ACCESS_TOKEN` is no longer required — dbmate connects directly.)
