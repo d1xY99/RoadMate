@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import {
   type ChangeEvent,
   type FormEvent,
@@ -138,7 +138,6 @@ function CameraIcon() {
 }
 
 export function Profile() {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const session = useAuth((s) => s.session);
   const loading = useAuth((s) => s.loading);
@@ -152,11 +151,6 @@ export function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (loading) return;
-    if (!session) navigate({ to: '/login' });
-  }, [loading, session, navigate]);
 
   const profileQ = useQuery({
     queryKey: ['profile', uid],
