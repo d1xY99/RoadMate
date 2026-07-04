@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Badge, type Column, DataTable } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -34,17 +34,10 @@ const fmtDate = (s: string) => new Date(s).toLocaleDateString('hr-HR');
 export function AdminDashboard() {
   const navigate = useNavigate();
   const session = useAuth((s) => s.session);
-  const loading = useAuth((s) => s.loading);
   const roles = useAuth((s) => s.roles);
   const signOut = useAuth((s) => s.signOut);
   const isAdmin = roles.includes('admin');
   const [section, setSection] = useState<SectionKey>('users');
-
-  useEffect(() => {
-    if (loading) return;
-    if (!session) navigate({ to: '/login' });
-    else if (!isAdmin) navigate({ to: '/' });
-  }, [loading, session, isAdmin, navigate]);
 
   const usersQ = useQuery({
     queryKey: ['admin', 'users'],
@@ -73,14 +66,6 @@ export function AdminDashboard() {
       return data as AdminPermission[];
     },
   });
-
-  if (loading || !session || !isAdmin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-400">
-        Ucitavanje...
-      </div>
-    );
-  }
 
   const userColumns: Column<AdminUser>[] = [
     { key: 'full_name', header: 'Ime', render: (u) => u.full_name || '—' },
@@ -194,7 +179,7 @@ export function AdminDashboard() {
           <h1 className="font-bold text-slate-900 text-xl">
             {NAV.find((n) => n.key === section)?.label}
           </h1>
-          <span className="text-slate-500 text-sm">{session.user.email}</span>
+          <span className="text-slate-500 text-sm">{session?.user.email}</span>
         </header>
 
         <div className="p-8">

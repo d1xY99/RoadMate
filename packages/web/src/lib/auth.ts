@@ -29,8 +29,9 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
   init: async () => {
     const { data } = await supabase.auth.getSession();
-    set({ session: data.session, loading: false });
+    // Load roles before clearing `loading` so admin guards don't flicker-redirect.
     if (data.session) await get().loadRoles();
+    set({ session: data.session, loading: false });
     supabase.auth.onAuthStateChange((_event, session) => {
       set({ session });
       if (session) get().loadRoles();
