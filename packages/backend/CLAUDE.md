@@ -21,7 +21,8 @@ src/
 ├── env.ts            # validated env access
 ├── db/               # postgres client, query helpers
 ├── auth/             # phone/SMS verification, JWT
-├── users/            # profiles, vehicle type, helper availability toggle
+├── users/            # user listing (admin) + token → user resolution
+├── profiles/         # own profile read/update (name, phone, vehicle, photo)
 ├── requests/         # help requests lifecycle (open→accepted→resolved)
 ├── matching/         # PostGIS "find available helpers within N km"
 ├── notifications/    # Expo push (fan-out via NATS)

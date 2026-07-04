@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'bun:test';
 import { createAuthServiceMock } from '../auth/service.mock';
+import { createProfileServiceMock } from '../profiles/service.mock';
 import { createServer } from '../server';
 import { createUserServiceMock } from '../users/service.mock';
 
 const app = createServer({
   authService: createAuthServiceMock(),
   userService: createUserServiceMock(),
+  profileService: createProfileServiceMock(),
 });
 
 describe('server', () => {
