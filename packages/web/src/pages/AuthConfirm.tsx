@@ -27,13 +27,12 @@ export function AuthConfirm() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const fail = (msg: string) => {
+    const fail = () => {
       setStatus('error');
-      setMessage(msg);
+      setMessage('Link je nevažeći ili istekao');
     };
 
-    const errorDescription = params.get('error_description');
-    if (errorDescription) return fail(errorDescription);
+    if (params.get('error_description')) return fail();
 
     const code = params.get('code');
     const tokenHash = params.get('token_hash');
@@ -42,19 +41,19 @@ export function AuthConfirm() {
     (async () => {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
-        return error ? fail(error.message) : setStatus('success');
+        return error ? fail() : setStatus('success');
       }
       if (tokenHash && type) {
         const { error } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
           type,
         });
-        return error ? fail(error.message) : setStatus('success');
+        return error ? fail() : setStatus('success');
       }
       // No token in the URL — maybe the client already exchanged it on load.
       const { data } = await supabase.auth.getSession();
       if (data.session) return setStatus('success');
-      fail('Link za potvrdu je nevažeći ili je istekao.');
+      fail();
     })();
   }, []);
 
@@ -97,10 +96,7 @@ export function AuthConfirm() {
   }
 
   return (
-    <AuthShell
-      title="Potvrda nije uspjela"
-      subtitle="Link je nevažeći ili istekao"
-    >
+    <AuthShell title="Potvrda nije uspjela" subtitle="">
       <Alert kind="error">{message}</Alert>
 
       {resent ? (
