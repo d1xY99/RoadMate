@@ -7,10 +7,12 @@ import {
 import { RequireAuth } from '@/components/RequireAuth';
 import { AdminDashboard } from '@/pages/AdminDashboard';
 import { AuthConfirm } from '@/pages/AuthConfirm';
+import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
 import { Profile } from '@/pages/Profile';
 import { Register } from '@/pages/Register';
+import { ResetPassword } from '@/pages/ResetPassword';
 
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
 
@@ -38,6 +40,18 @@ const authConfirmRoute = createRoute({
   component: AuthConfirm,
 });
 
+const forgotPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/forgot-password',
+  component: ForgotPassword,
+});
+
+const resetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/reset-password',
+  component: ResetPassword,
+});
+
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin-dashboard',
@@ -63,6 +77,8 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   registerRoute,
   authConfirmRoute,
+  forgotPasswordRoute,
+  resetPasswordRoute,
   adminRoute,
   profileRoute,
 ]);
