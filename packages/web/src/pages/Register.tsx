@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/auth';
 export function Register() {
   const navigate = useNavigate();
   const signUp = useAuth((s) => s.signUp);
+  const resendVerification = useAuth((s) => s.resendVerification);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,6 +20,7 @@ export function Register() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -48,8 +50,24 @@ export function Register() {
       <AuthShell title="Provjeri email" subtitle="Jos jedan korak">
         <Alert kind="success">
           Poslali smo ti link za potvrdu na <strong>{email}</strong>. Otvori ga
-          da aktiviras racun.
+          da aktiviraš račun.
         </Alert>
+        {resent ? (
+          <p className="mt-4 text-center text-green-600 text-sm">
+            Novi link je poslan.
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={async () => {
+              await resendVerification(email);
+              setResent(true);
+            }}
+            className="mt-4 w-full text-center font-semibold text-brand text-sm hover:underline"
+          >
+            Nisi dobio email? Pošalji ponovo
+          </button>
+        )}
         <p className="mt-6 text-center text-slate-500 text-sm">
           <Link
             to="/login"
