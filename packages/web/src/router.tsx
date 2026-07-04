@@ -4,6 +4,7 @@ import {
   createRouter,
   Outlet,
 } from '@tanstack/react-router';
+import { RequireAuth } from '@/components/RequireAuth';
 import { AdminDashboard } from '@/pages/AdminDashboard';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
@@ -33,13 +34,21 @@ const registerRoute = createRoute({
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin-dashboard',
-  component: AdminDashboard,
+  component: () => (
+    <RequireAuth requireAdmin>
+      <AdminDashboard />
+    </RequireAuth>
+  ),
 });
 
 const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/profile',
-  component: Profile,
+  component: () => (
+    <RequireAuth>
+      <Profile />
+    </RequireAuth>
+  ),
 });
 
 const routeTree = rootRoute.addChildren([
