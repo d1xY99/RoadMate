@@ -60,7 +60,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 colSpan={columns.length}
                 className="px-4 py-10 text-center text-slate-400"
               >
-                Ucitavanje...
+                Učitavanje...
               </td>
             </tr>
           ) : rows.length === 0 ? (

@@ -25,7 +25,7 @@ export function AuthShell({
         </div>
         <div className="relative z-10">
           <h1 className="font-bold text-4xl leading-tight">
-            Pomoc na cesti,
+            Pomoć na cesti,
             <br /> zajednica koja se odaziva.
           </h1>
           <p className="mt-4 max-w-md text-lg text-white/80">
@@ -120,7 +120,7 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setShow((s) => !s)}
-          aria-label={show ? 'Sakrij lozinku' : 'Prikazi lozinku'}
+          aria-label={show ? 'Sakrij lozinku' : 'Prikaži lozinku'}
           className="-translate-y-1/2 absolute top-1/2 right-2.5 text-slate-400 transition hover:text-slate-600"
         >
           <EyeIcon off={show} />
