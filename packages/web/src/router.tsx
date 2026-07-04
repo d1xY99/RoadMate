@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router';
 import { RequireAuth } from '@/components/RequireAuth';
 import { AdminDashboard } from '@/pages/AdminDashboard';
+import { AuthConfirm } from '@/pages/AuthConfirm';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
 import { Profile } from '@/pages/Profile';
@@ -29,6 +30,12 @@ const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/register',
   component: Register,
+});
+
+const authConfirmRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/auth/confirm',
+  component: AuthConfirm,
 });
 
 const adminRoute = createRoute({
@@ -55,6 +62,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
+  authConfirmRoute,
   adminRoute,
   profileRoute,
 ]);
