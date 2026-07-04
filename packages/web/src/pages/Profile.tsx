@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react';
 import { Alert, TextField } from '@/components/AuthShell';
+import { HelperToggle } from '@/components/HelperToggle';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
@@ -359,6 +360,10 @@ export function Profile() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-6">
+          <HelperToggle />
         </div>
 
         {/* Podaci */}
