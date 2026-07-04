@@ -82,8 +82,8 @@ export function Register() {
 
   return (
     <AuthShell
-      title="Napravi racun"
-      subtitle="Pridruzi se zajednici za pomoc na cesti"
+      title="Napravi račun"
+      subtitle="Pridruži se zajednici za pomoć na cesti"
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {error && <Alert kind="error">{error}</Alert>}
@@ -91,7 +91,7 @@ export function Register() {
           label="Ime i prezime"
           type="text"
           autoComplete="name"
-          placeholder="Marko Markovic"
+          placeholder="Marko Marković"
           required
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
@@ -127,7 +127,7 @@ export function Register() {
       </form>
 
       <p className="mt-6 text-center text-slate-500 text-sm">
-        Vec imas racun?{' '}
+        Već imaš račun?{' '}
         <Link to="/login" className="font-semibold text-brand hover:underline">
           Prijavi se
         </Link>

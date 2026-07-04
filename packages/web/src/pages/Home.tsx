@@ -18,7 +18,7 @@ export function Home() {
         <div className="mt-10 text-6xl">🚧</div>
         <h1 className="mt-6 font-bold text-4xl sm:text-5xl">U izradi</h1>
         <p className="mt-4 max-w-md text-lg text-white/80">
-          Radimo na aplikaciji za pomoc na cesti. Uskoro stize — zajednica koja
+          Radimo na aplikaciji za pomoć na cesti. Uskoro stiže — zajednica koja
           se odaziva.
         </p>
 
