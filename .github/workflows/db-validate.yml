@@ -21,7 +21,9 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pin the version: `latest` resolves via the GitHub API and hits the
+          # unauthenticated rate limit on shared runners.
+          version: 2.106.0
 
       - run: bun install --frozen-lockfile
 

@@ -4,9 +4,12 @@ import {
   createRouter,
   Outlet,
 } from '@tanstack/react-router';
+import { AdminDashboard } from '@/pages/AdminDashboard';
 import { Home } from '@/pages/Home';
+import { Login } from '@/pages/Login';
+import { Profile } from '@/pages/Profile';
+import { Register } from '@/pages/Register';
 
-// Code-based routes (no file-based codegen) so typecheck works out of the box.
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
 
 const indexRoute = createRoute({
@@ -15,7 +18,37 @@ const indexRoute = createRoute({
   component: Home,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute]);
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: Login,
+});
+
+const registerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/register',
+  component: Register,
+});
+
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin-dashboard',
+  component: AdminDashboard,
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/profile',
+  component: Profile,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  loginRoute,
+  registerRoute,
+  adminRoute,
+  profileRoute,
+]);
 
 export const router = createRouter({ routeTree });
 
