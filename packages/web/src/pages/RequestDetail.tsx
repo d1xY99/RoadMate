@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { PROBLEM_LABELS, type ProblemType } from '@/components/HelpRequestForm';
 import { Logo } from '@/components/Logo';
+import { RequestChat } from '@/components/RequestChat';
 import { RequestFeedback } from '@/components/RequestFeedback';
 import { RequestTracking } from '@/components/RequestTracking';
 import { useAuth } from '@/lib/auth';
@@ -221,6 +222,11 @@ export function RequestDetail() {
             helperName={helper?.full_name ?? 'Pomagač'}
             helperVehicle={helper?.vehicle_type ?? null}
           />
+        )}
+
+        {/* Chat (#29) — dok je pomoć aktivna */}
+        {request.status === 'accepted' && (
+          <RequestChat requestId={request.id} />
         )}
 
         {/* Pomagač */}
