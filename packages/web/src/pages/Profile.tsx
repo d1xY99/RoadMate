@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { Alert, TextField } from '@/components/AuthShell';
 import { HelperToggle } from '@/components/HelperToggle';
+import { Logo } from '@/components/Logo';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
@@ -264,8 +265,8 @@ export function Profile() {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-20 flex items-center justify-between border-slate-200 border-b bg-white/80 px-6 py-4 backdrop-blur">
-        <Link to="/" className="font-bold text-brand text-lg">
-          🚗 RoadMate
+        <Link to="/">
+          <Logo />
         </Link>
         <span className="text-slate-500 text-sm">{session.user.email}</span>
       </header>

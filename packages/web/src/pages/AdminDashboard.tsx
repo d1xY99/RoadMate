@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { Logo } from '@/components/Logo';
 import { Badge, type Column, DataTable } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -134,8 +135,8 @@ export function AdminDashboard() {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <aside className="flex w-60 flex-col border-slate-200 border-r bg-white">
-        <div className="px-5 py-5 font-bold text-brand text-lg">
-          🚗 RoadMate
+        <div className="px-5 py-5">
+          <Logo />
         </div>
         <nav className="flex-1 px-3">
           {NAV.map((item) => (
