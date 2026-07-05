@@ -93,7 +93,7 @@ export function HelperToggle() {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span
@@ -102,10 +102,10 @@ export function HelperToggle() {
             }`}
           />
           <div>
-            <div className="font-semibold text-slate-900">
+            <div className="font-semibold text-slate-900 dark:text-slate-100">
               {available ? 'Dostupan za pomoć' : 'Nedostupan'}
             </div>
-            <div className="text-slate-500 text-xs">
+            <div className="text-slate-500 text-xs dark:text-slate-400">
               {available
                 ? 'Vidljiv si pomagačima u blizini.'
                 : 'Uključi da primaš zahtjeve u blizini.'}

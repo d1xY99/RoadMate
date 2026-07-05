@@ -39,14 +39,18 @@ export function AuthShell({
         </div>
       </div>
 
-      <div className="flex items-center justify-center bg-slate-50 p-6">
+      <div className="flex items-center justify-center bg-slate-50 p-6 dark:bg-slate-950">
         <div className="w-full max-w-md">
           <div className="mb-6 flex justify-center lg:hidden">
             <Logo size="lg" />
           </div>
-          <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xl">
-            <h2 className="font-bold text-2xl text-slate-900">{title}</h2>
-            <p className="mt-1 text-slate-500 text-sm">{subtitle}</p>
+          <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="font-bold text-2xl text-slate-900 dark:text-slate-100">
+              {title}
+            </h2>
+            <p className="mt-1 text-slate-500 text-sm dark:text-slate-400">
+              {subtitle}
+            </p>
             <div className="mt-6">{children}</div>
           </div>
         </div>
@@ -61,11 +65,11 @@ export function TextField({
 }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
-      <span className="mb-1.5 block font-medium text-slate-700 text-sm">
+      <span className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
         {label}
       </span>
       <input
-        className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
+        className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
         {...props}
       />
     </label>
@@ -109,13 +113,13 @@ export function PasswordField({
   const [show, setShow] = useState(false);
   return (
     <label className="block">
-      <span className="mb-1.5 block font-medium text-slate-700 text-sm">
+      <span className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
         {label}
       </span>
       <div className="relative">
         <input
           type={show ? 'text' : 'password'}
-          className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 pr-11 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
+          className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 pr-11 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
           {...props}
         />
         <button

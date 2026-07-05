@@ -11,6 +11,7 @@ import {
 import { Alert, TextField } from '@/components/AuthShell';
 import { HelperToggle } from '@/components/HelperToggle';
 import { Logo } from '@/components/Logo';
+import { ThemePicker } from '@/components/ThemePicker';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
@@ -263,17 +264,19 @@ export function Profile() {
     : null;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-20 flex items-center justify-between border-slate-200 border-b bg-white/80 px-6 py-4 backdrop-blur">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-slate-200 border-b bg-white/80 px-6 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
         <Link to="/">
           <Logo />
         </Link>
-        <span className="text-slate-500 text-sm">{session.user.email}</span>
+        <span className="text-slate-500 text-sm dark:text-slate-400">
+          {session.user.email}
+        </span>
       </header>
 
       <main className="mx-auto max-w-2xl px-4 pb-16 sm:px-6">
         {/* Cover + avatar */}
-        <div className="relative mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+        <div className="relative mt-6 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="relative h-28 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700">
             <div
               aria-hidden
@@ -328,10 +331,10 @@ export function Profile() {
               )}
             </div>
 
-            <h1 className="mt-4 font-bold text-2xl text-slate-900">
+            <h1 className="mt-4 font-bold text-2xl text-slate-900 dark:text-slate-100">
               {fullName || 'Bez imena'}
             </h1>
-            <p className="mt-0.5 text-slate-500 text-sm">
+            <p className="mt-0.5 text-slate-500 text-sm dark:text-slate-400">
               {session.user.email}
             </p>
 
@@ -342,7 +345,7 @@ export function Profile() {
                   <ThumbIcon />
                 </span>
                 <div>
-                  <div className="font-bold text-lg text-slate-900 leading-none">
+                  <div className="font-bold text-lg text-slate-900 leading-none dark:text-slate-100">
                     {profile?.thumbs_up ?? 0}
                   </div>
                   <div className="mt-1 text-slate-500 text-xs">Pohvale</div>
@@ -353,7 +356,7 @@ export function Profile() {
                   <ThumbIcon down />
                 </span>
                 <div>
-                  <div className="font-bold text-lg text-slate-900 leading-none">
+                  <div className="font-bold text-lg text-slate-900 leading-none dark:text-slate-100">
                     {profile?.thumbs_down ?? 0}
                   </div>
                   <div className="mt-1 text-slate-500 text-xs">Zamjerke</div>
@@ -368,9 +371,11 @@ export function Profile() {
         </div>
 
         {/* Podaci */}
-        <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <h2 className="font-semibold text-lg text-slate-900">Moji podaci</h2>
-          <p className="mt-0.5 text-slate-500 text-sm">
+        <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
+            Moji podaci
+          </h2>
+          <p className="mt-0.5 text-slate-500 text-sm dark:text-slate-400">
             Vidi i ažuriraj svoje podatke.
           </p>
 
@@ -397,7 +402,7 @@ export function Profile() {
             />
 
             <fieldset>
-              <legend className="mb-1.5 block font-medium text-slate-700 text-sm">
+              <legend className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
                 Tip vozila
               </legend>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -412,7 +417,7 @@ export function Profile() {
                       className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-sm transition ${
                         active
                           ? 'border-brand bg-brand/5 font-semibold text-brand ring-2 ring-brand/20'
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                       }`}
                     >
                       <VehicleIcon type={v.value} />
@@ -435,6 +440,8 @@ export function Profile() {
             </button>
           </form>
         </div>
+
+        <ThemePicker />
       </main>
     </div>
   );

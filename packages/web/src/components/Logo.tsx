@@ -37,7 +37,11 @@ export function Logo({
       </svg>
       {!iconOnly && (
         <span className={`font-bold ${text} tracking-tight`}>
-          <span className={light ? 'text-white' : 'text-slate-900'}>Road</span>
+          <span
+            className={light ? 'text-white' : 'text-slate-900 dark:text-white'}
+          >
+            Road
+          </span>
           <span className={light ? 'text-white/80' : 'text-brand'}>Mate</span>
         </span>
       )}

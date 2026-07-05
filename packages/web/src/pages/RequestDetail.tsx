@@ -160,21 +160,23 @@ export function RequestDetail() {
   const active = request.status === 'open' || request.status === 'accepted';
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-20 flex items-center justify-between border-slate-200 border-b bg-white/80 px-6 py-4 backdrop-blur">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-slate-200 border-b bg-white/80 px-6 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
         <Link to="/">
           <Logo />
         </Link>
         <Link
           to="/"
-          className="text-slate-500 text-sm transition hover:text-slate-800"
+          className="text-slate-500 text-sm transition hover:text-slate-800 dark:hover:text-slate-200"
         >
           ← Karta
         </Link>
       </header>
 
       <main className="mx-auto max-w-lg p-4 sm:p-6">
-        <h1 className="font-bold text-2xl text-slate-900">Detalji zahtjeva</h1>
+        <h1 className="font-bold text-2xl text-slate-900 dark:text-slate-100">
+          Detalji zahtjeva
+        </h1>
 
         {/* Status + tip */}
         <div className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">

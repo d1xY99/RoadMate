@@ -13,6 +13,25 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Dark theme canvas (see lib/theme.ts) */
+.dark {
+  color-scheme: dark;
+}
+.dark body {
+  background: #020617;
+}
+.dark .maplibregl-popup-content {
+  background: #1e293b;
+}
+.dark .maplibregl-popup-tip {
+  border-top-color: #1e293b;
+  border-bottom-color: #1e293b;
+}
+.dark .helper-popup,
+.dark .helper-popup strong {
+  color: #e2e8f0;
+}
+
 /* Entrance animations (Home overlays) */
 @keyframes fade-up {
   from {
