@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { PROBLEM_LABELS, type ProblemType } from '@/components/HelpRequestForm';
 import { Logo } from '@/components/Logo';
+import { RequestFeedback } from '@/components/RequestFeedback';
 import { RequestTracking } from '@/components/RequestTracking';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -13,6 +14,7 @@ type HelpRequest = {
   type: ProblemType;
   description: string | null;
   status: Status;
+  requester_id: string;
   helper_id: string | null;
   created_at: string;
   accepted_at: string | null;
@@ -84,7 +86,7 @@ export function RequestDetail() {
       const { data, error } = await supabase
         .from('help_requests')
         .select(
-          'id, type, description, status, helper_id, created_at, accepted_at, resolved_at, cancelled_at',
+          'id, type, description, status, requester_id, helper_id, created_at, accepted_at, resolved_at, cancelled_at',
         )
         .eq('id', id)
         .maybeSingle();
@@ -253,6 +255,16 @@ export function RequestDetail() {
             )}
           </div>
         )}
+
+        {/* Ocjenjivanje (#31) — nakon završetka */}
+        {request.status === 'resolved' &&
+          (() => {
+            const toUser =
+              role === 'requester' ? request.helper_id : request.requester_id;
+            return toUser ? (
+              <RequestFeedback requestId={request.id} toUser={toUser} />
+            ) : null;
+          })()}
 
         {/* Akcije */}
         {active && (
