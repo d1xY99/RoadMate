@@ -1,8 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { HelperToggle } from '@/components/HelperToggle';
-import { MapView } from '@/components/MapView';
+import { MapView, type NearbyHelper } from '@/components/MapView';
 import { useAuth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 const DEFAULT_CENTER: [number, number] = [15.98, 45.81];
 
@@ -95,6 +97,24 @@ function MapHome() {
     toastTimer.current = setTimeout(() => setToast(false), 2500);
   };
 
+  // Nearby available helpers (#10); auto-refresh while the map is open.
+  const helpersQ = useQuery({
+    queryKey: ['nearby-helpers', center],
+    enabled: !!center,
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const [lng, lat] = center as [number, number];
+      const { data, error } = await supabase.rpc('find_nearby_helpers', {
+        lat,
+        lng,
+        radius_m: 15_000,
+      });
+      if (error) throw error;
+      return data as NearbyHelper[];
+    },
+  });
+  const helpers = helpersQ.data ?? [];
+
   const email = session?.user.email ?? '';
   const initial = (email[0] ?? '?').toUpperCase();
 
@@ -104,6 +124,7 @@ function MapHome() {
         center={center ?? DEFAULT_CENTER}
         zoom={center ? 15 : 12}
         showUserMarker={!!center}
+        helpers={helpers}
       />
 
       {/* Gornja traka */}
@@ -145,6 +166,18 @@ function MapHome() {
         {geoError && (
           <div className="pointer-events-auto mx-auto mt-2 w-fit animate-fade-down rounded-full bg-slate-900/80 px-4 py-1.5 text-white text-xs backdrop-blur">
             Lokacija nije dostupna — prikazujemo zadanu kartu.
+          </div>
+        )}
+        {center && helpersQ.isSuccess && (
+          <div className="pointer-events-auto mx-auto mt-2 flex w-fit animate-fade-down items-center gap-2 rounded-full border border-white/50 bg-white/80 px-4 py-1.5 font-medium text-slate-700 text-xs shadow backdrop-blur">
+            <span
+              className={`inline-block h-2 w-2 rounded-full ${
+                helpers.length ? 'bg-green-500' : 'bg-slate-300'
+              }`}
+            />
+            {helpers.length
+              ? `${helpers.length} ${helpers.length === 1 ? 'pomagač' : 'pomagača'} u blizini`
+              : 'Nema dostupnih pomagača u blizini'}
           </div>
         )}
       </header>
