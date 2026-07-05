@@ -12,6 +12,7 @@ import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
 import { Profile } from '@/pages/Profile';
 import { Register } from '@/pages/Register';
+import { RequestDetail } from '@/pages/RequestDetail';
 import { ResetPassword } from '@/pages/ResetPassword';
 
 const rootRoute = createRootRoute({ component: () => <Outlet /> });
@@ -72,6 +73,16 @@ const profileRoute = createRoute({
   ),
 });
 
+const requestDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/request/$id',
+  component: () => (
+    <RequireAuth>
+      <RequestDetail />
+    </RequireAuth>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -81,6 +92,7 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   adminRoute,
   profileRoute,
+  requestDetailRoute,
 ]);
 
 export const router = createRouter({ routeTree });
