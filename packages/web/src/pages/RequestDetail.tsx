@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { PROBLEM_LABELS, type ProblemType } from '@/components/HelpRequestForm';
 import { Logo } from '@/components/Logo';
+import { RequestTracking } from '@/components/RequestTracking';
+import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
 type Status = 'open' | 'accepted' | 'resolved' | 'cancelled';
@@ -107,6 +109,10 @@ export function RequestDetail() {
   });
   const helper = helperQ.data;
 
+  const uid = useAuth((s) => s.session?.user.id);
+  const role: 'requester' | 'helper' =
+    request?.helper_id === uid ? 'helper' : 'requester';
+
   const setStatus = async (status: Status) => {
     if (!request) return;
     const stamp =
@@ -204,6 +210,16 @@ export function RequestDetail() {
             )}
           </dl>
         </div>
+
+        {/* Live praćenje (#28) — nakon prihvata */}
+        {request.status === 'accepted' && (
+          <RequestTracking
+            requestId={request.id}
+            role={role}
+            helperName={helper?.full_name ?? 'Pomagač'}
+            helperVehicle={helper?.vehicle_type ?? null}
+          />
+        )}
 
         {/* Pomagač */}
         {request.helper_id && (
