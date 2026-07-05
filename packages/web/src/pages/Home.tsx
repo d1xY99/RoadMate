@@ -119,18 +119,6 @@ function MapHome() {
   });
   const activeRequest = activeQ.data ?? null;
 
-  const cancelRequest = async () => {
-    if (!activeRequest) return;
-    await supabase
-      .from('help_requests')
-      .update({
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString(),
-      })
-      .eq('id', activeRequest.id);
-    activeQ.refetch();
-  };
-
   // Nearby available helpers (#10); auto-refresh while the map is open.
   const helpersQ = useQuery({
     queryKey: ['nearby-helpers', center],
@@ -239,13 +227,13 @@ function MapHome() {
                     </div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={cancelRequest}
-                  className="rounded-lg px-3 py-1.5 font-medium text-red-600 text-sm transition hover:bg-red-50"
+                <Link
+                  to="/request/$id"
+                  params={{ id: activeRequest.id }}
+                  className="rounded-lg px-3 py-1.5 font-medium text-brand text-sm transition hover:bg-brand/5"
                 >
-                  Otkaži
-                </button>
+                  Detalji →
+                </Link>
               </div>
             </div>
           ) : (
