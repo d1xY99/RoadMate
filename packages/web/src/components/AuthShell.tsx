@@ -1,4 +1,5 @@
 import { type InputHTMLAttributes, type ReactNode, useState } from 'react';
+import { Logo } from '@/components/Logo';
 
 export function AuthShell({
   title,
@@ -20,8 +21,8 @@ export function AuthShell({
           aria-hidden
           className="-bottom-24 -left-16 absolute h-80 w-80 rounded-full bg-white/10 blur-3xl"
         />
-        <div className="relative z-10 text-2xl font-bold tracking-tight">
-          🚗 RoadMate
+        <div className="relative z-10">
+          <Logo size="lg" light />
         </div>
         <div className="relative z-10">
           <h1 className="font-bold text-4xl leading-tight">
@@ -40,8 +41,8 @@ export function AuthShell({
 
       <div className="flex items-center justify-center bg-slate-50 p-6">
         <div className="w-full max-w-md">
-          <div className="mb-6 text-center lg:hidden">
-            <span className="font-bold text-2xl text-brand">🚗 RoadMate</span>
+          <div className="mb-6 flex justify-center lg:hidden">
+            <Logo size="lg" />
           </div>
           <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xl">
             <h2 className="font-bold text-2xl text-slate-900">{title}</h2>

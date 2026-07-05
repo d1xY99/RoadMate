@@ -1,10 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HelperToggle } from '@/components/HelperToggle';
+import {
+  HelpRequestForm,
+  PROBLEM_LABELS,
+  type ProblemType,
+} from '@/components/HelpRequestForm';
+import { Logo } from '@/components/Logo';
 import { MapView, type NearbyHelper } from '@/components/MapView';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+
+type ActiveRequest = {
+  id: string;
+  type: ProblemType;
+  status: 'open' | 'accepted';
+};
 
 const DEFAULT_CENTER: [number, number] = [15.98, 45.81];
 
@@ -22,8 +34,8 @@ function Landing() {
       />
 
       <div className="relative z-10 flex flex-col items-center">
-        <span className="animate-fade-down font-bold text-2xl tracking-tight">
-          🚗 RoadMate
+        <span className="animate-fade-down">
+          <Logo size="lg" light />
         </span>
 
         <div className="mt-10 animate-fade-up text-6xl">🚧</div>
@@ -74,8 +86,7 @@ function MapHome() {
   const signOut = useAuth((s) => s.signOut);
   const [center, setCenter] = useState<[number, number] | null>(null);
   const [geoError, setGeoError] = useState(false);
-  const [toast, setToast] = useState(false);
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -87,14 +98,37 @@ function MapHome() {
       () => setGeoError(true),
       { enableHighAccuracy: true, timeout: 10_000 },
     );
-    return () => clearTimeout(toastTimer.current);
   }, []);
 
-  // ponytail: "Trebam pomoć" opens the request form once #9 lands; toast for now.
-  const onNeedHelp = () => {
-    setToast(true);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(false), 2500);
+  // Latest open/accepted request by this user (#9: active request state).
+  const activeQ = useQuery({
+    queryKey: ['active-request', session?.user.id],
+    enabled: !!session,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('help_requests')
+        .select('id, type, status')
+        .eq('requester_id', session?.user.id as string)
+        .in('status', ['open', 'accepted'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as ActiveRequest | null) ?? null;
+    },
+  });
+  const activeRequest = activeQ.data ?? null;
+
+  const cancelRequest = async () => {
+    if (!activeRequest) return;
+    await supabase
+      .from('help_requests')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+      })
+      .eq('id', activeRequest.id);
+    activeQ.refetch();
   };
 
   // Nearby available helpers (#10); auto-refresh while the map is open.
@@ -130,9 +164,7 @@ function MapHome() {
       {/* Gornja traka */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-20 p-3 sm:p-4">
         <div className="pointer-events-auto mx-auto flex max-w-3xl animate-fade-down items-center justify-between gap-3 rounded-2xl border border-white/50 bg-white/75 px-4 py-2.5 shadow-lg backdrop-blur-md">
-          <span className="font-bold text-brand text-lg tracking-tight">
-            🚗 RoadMate
-          </span>
+          <Logo />
           <div className="flex items-center gap-2">
             {isAdmin && (
               <Link
@@ -188,21 +220,71 @@ function MapHome() {
           <div className="animate-fade-up" style={{ animationDelay: '0.15s' }}>
             <HelperToggle />
           </div>
-          <button
-            type="button"
-            onClick={onNeedHelp}
-            className="animate-sos flex h-14 w-full animate-fade-up items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 font-bold text-lg text-white shadow-xl transition hover:brightness-110 active:scale-[0.98]"
-            style={{ animationDelay: '0.25s' }}
-          >
-            🆘 Trebam pomoć
-          </button>
+          {activeRequest ? (
+            <div className="animate-fade-up rounded-2xl border border-slate-100 bg-white p-4 shadow-xl">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
+                  </span>
+                  <div>
+                    <div className="font-semibold text-slate-900">
+                      Aktivan zahtjev — {PROBLEM_LABELS[activeRequest.type]}
+                    </div>
+                    <div className="text-slate-500 text-xs">
+                      {activeRequest.status === 'open'
+                        ? 'Čeka pomagača…'
+                        : 'Pomagač je prihvatio.'}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={cancelRequest}
+                  className="rounded-lg px-3 py-1.5 font-medium text-red-600 text-sm transition hover:bg-red-50"
+                >
+                  Otkaži
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setFormOpen(true)}
+              className="animate-sos flex h-14 w-full animate-fade-up items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 font-bold text-lg text-white shadow-xl transition hover:brightness-110 active:scale-[0.98]"
+              style={{ animationDelay: '0.25s' }}
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+              </svg>
+              Trebam pomoć
+            </button>
+          )}
         </div>
       </div>
 
-      {toast && (
-        <div className="-translate-x-1/2 absolute bottom-28 left-1/2 z-30 animate-fade-up rounded-full bg-slate-900/85 px-5 py-2.5 text-sm text-white shadow-lg backdrop-blur">
-          Forma za zahtjev stiže uskoro.
-        </div>
+      {formOpen && (
+        <HelpRequestForm
+          center={center}
+          onClose={() => setFormOpen(false)}
+          onCreated={() => {
+            setFormOpen(false);
+            activeQ.refetch();
+          }}
+        />
       )}
     </div>
   );
