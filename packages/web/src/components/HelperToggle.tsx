@@ -93,7 +93,7 @@ export function HelperToggle() {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="rounded-2xl border border-white/40 bg-white/50 p-5 shadow-lg backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/45">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span

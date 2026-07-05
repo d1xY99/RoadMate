@@ -10,31 +10,40 @@ const stored = (): ThemePref => {
   return v === 'light' || v === 'dark' || v === 'auto' ? v : 'auto';
 };
 
-const apply = (pref: ThemePref) => {
-  const dark = pref === 'dark' || (pref === 'auto' && media.matches);
+const isDark = (pref: ThemePref) =>
+  pref === 'dark' || (pref === 'auto' && media.matches);
+
+const applyClass = (dark: boolean) => {
   document.documentElement.classList.toggle('dark', dark);
 };
 
 interface ThemeState {
   pref: ThemePref;
+  dark: boolean;
   setPref: (p: ThemePref) => void;
   init: () => void;
 }
 
 export const useTheme = create<ThemeState>((set) => ({
   pref: stored(),
+  dark: isDark(stored()),
   setPref: (p) => {
     localStorage.setItem(STORAGE_KEY, p);
-    apply(p);
-    set({ pref: p });
+    const dark = isDark(p);
+    applyClass(dark);
+    set({ pref: p, dark });
   },
   init: () => {
     const pref = stored();
-    apply(pref);
+    const dark = isDark(pref);
+    applyClass(dark);
+    set({ pref, dark });
     // Follow the OS scheme while on 'auto'.
     media.addEventListener('change', () => {
-      if (stored() === 'auto') apply('auto');
+      if (stored() !== 'auto') return;
+      const dark = media.matches;
+      applyClass(dark);
+      set({ dark });
     });
-    set({ pref });
   },
 }));
