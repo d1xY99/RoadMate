@@ -151,7 +151,7 @@ function MapHome() {
 
       {/* Gornja traka */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-20 p-3 sm:p-4">
-        <div className="pointer-events-auto mx-auto flex max-w-3xl animate-fade-down items-center justify-between gap-3 rounded-2xl border border-white/30 bg-white/25 px-4 py-2.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/30">
+        <div className="pointer-events-auto mx-auto flex max-w-3xl animate-fade-down items-center justify-between gap-3 rounded-2xl border border-white/30 bg-white/40 px-4 py-2.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/40">
           <Logo />
           <div className="flex items-center gap-2">
             {isAdmin && (
@@ -189,7 +189,7 @@ function MapHome() {
           </div>
         )}
         {center && helpersQ.isSuccess && (
-          <div className="pointer-events-auto mx-auto mt-2 flex w-fit animate-fade-down items-center gap-2 rounded-full border border-white/30 bg-white/25 px-4 py-1.5 font-medium text-slate-700 text-xs shadow backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/35 dark:text-slate-200">
+          <div className="pointer-events-auto mx-auto mt-2 flex w-fit animate-fade-down items-center gap-2 rounded-full border border-white/30 bg-white/40 px-4 py-1.5 font-medium text-slate-700 text-xs shadow backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-200">
             <span
               className={`inline-block h-2 w-2 rounded-full ${
                 helpers.length ? 'bg-green-500' : 'bg-slate-300'
@@ -209,7 +209,7 @@ function MapHome() {
             <HelperToggle />
           </div>
           {activeRequest ? (
-            <div className="animate-fade-up rounded-2xl border border-white/30 bg-white/40 p-4 shadow-xl backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/45">
+            <div className="animate-fade-up rounded-2xl border border-white/30 bg-white/40 p-4 shadow-xl backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/40">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-2.5 w-2.5">

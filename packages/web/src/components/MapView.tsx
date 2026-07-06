@@ -78,8 +78,10 @@ export function MapView({
       style: dark ? DARK_STYLE : LIGHT_STYLE,
       center,
       zoom,
+      // Clean, app-like map: no zoom/compass controls, no attribution bar.
+      // NOTE: re-add OSM/CARTO attribution (e.g. on an about page) pre-launch.
+      attributionControl: false,
     });
-    map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
     mapRef.current = map;
     return () => {
       markerRef.current = null;
