@@ -78,8 +78,8 @@ export function MapView({
       style: dark ? DARK_STYLE : LIGHT_STYLE,
       center,
       zoom,
-      // Clean, app-like map: no zoom/compass controls, no attribution bar.
-      // NOTE: re-add OSM/CARTO attribution (e.g. on an about page) pre-launch.
+      // Clean, app-like map: no zoom/compass controls; attribution lives in
+      // the tiny footer link below instead of the default control.
       attributionControl: false,
     });
     mapRef.current = map;
@@ -147,5 +147,30 @@ export function MapView({
     mapRef.current?.setStyle(dark ? DARK_STYLE : LIGHT_STYLE);
   }, [dark]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      {/* Licencno obavezna atribucija — sitni footer link umjesto default kontrole */}
+      <div className="absolute right-2 bottom-1 z-10 text-[10px] text-slate-400/90 dark:text-slate-500">
+        ©{' '}
+        <a
+          href="https://carto.com/attributions"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:underline"
+        >
+          CARTO
+        </a>{' '}
+        · ©{' '}
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:underline"
+        >
+          OpenStreetMap
+        </a>
+      </div>
+    </div>
+  );
 }
