@@ -9,6 +9,7 @@ import {
 } from '@/components/HelpRequestForm';
 import { Logo } from '@/components/Logo';
 import { MapView, type NearbyHelper } from '@/components/MapView';
+import { SosSheet } from '@/components/SosSheet';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
@@ -87,6 +88,7 @@ function MapHome() {
   const [center, setCenter] = useState<[number, number] | null>(null);
   const [geoError, setGeoError] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [sosOpen, setSosOpen] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -202,6 +204,16 @@ function MapHome() {
         )}
       </header>
 
+      {/* SOS (#30) — sigurnosni panel, dostupan cijelo vrijeme */}
+      <button
+        type="button"
+        onClick={() => setSosOpen(true)}
+        aria-label="Hitna pomoć"
+        className="absolute top-20 right-4 z-20 flex h-12 w-12 animate-fade-down items-center justify-center rounded-full bg-red-500 font-bold text-sm text-white shadow-lg ring-4 ring-red-500/25 transition hover:bg-red-600 active:scale-95 sm:top-24"
+      >
+        SOS
+      </button>
+
       {/* Donje akcije */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-4 pb-6">
         <div className="pointer-events-auto mx-auto flex w-full max-w-md flex-col gap-3">
@@ -263,6 +275,8 @@ function MapHome() {
           )}
         </div>
       </div>
+
+      {sosOpen && <SosSheet onClose={() => setSosOpen(false)} />}
 
       {formOpen && (
         <HelpRequestForm
