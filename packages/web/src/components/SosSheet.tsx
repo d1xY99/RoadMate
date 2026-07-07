@@ -1,19 +1,33 @@
-import { useState } from 'react';
-
-// Croatian emergency numbers (app is hr-HR). 112 is the universal EU line.
-const EMERGENCY = [
-  { label: 'Hitne službe', number: '112', primary: true },
-  { label: 'Policija', number: '192' },
-  { label: 'Hitna pomoć', number: '194' },
-  { label: 'Vatrogasci', number: '193' },
-];
+import { useEffect, useState } from 'react';
+import {
+  countryFromCoords,
+  type Emergency,
+  emergencyFor,
+} from '@/lib/emergency';
 
 type ShareState = 'idle' | 'sharing' | 'shared' | 'copied' | 'error';
 
 // Safety panel during an intervention (#30): share your live location with a
-// contact + one-tap access to emergency numbers.
+// contact + one-tap access to emergency numbers (matched to the user's country).
 export function SosSheet({ onClose }: { onClose: () => void }) {
   const [share, setShare] = useState<ShareState>('idle');
+  // Default to the universal 112 until we resolve the country from the location.
+  const [numbers, setNumbers] = useState<Emergency[]>(() => emergencyFor());
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const cc = await countryFromCoords(
+          pos.coords.latitude,
+          pos.coords.longitude,
+        );
+        setNumbers(emergencyFor(cc));
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10_000 },
+    );
+  }, []);
 
   const shareLocation = () => {
     if (!navigator.geolocation) {
@@ -148,7 +162,7 @@ export function SosSheet({ onClose }: { onClose: () => void }) {
             HITNI BROJEVI
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {EMERGENCY.map((e) => (
+            {numbers.map((e) => (
               <a
                 key={e.number}
                 href={`tel:${e.number}`}
