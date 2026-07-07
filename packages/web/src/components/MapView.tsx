@@ -1,5 +1,6 @@
 import maplibregl from 'maplibre-gl';
 import { useEffect, useRef } from 'react';
+import { useTheme } from '@/lib/theme';
 
 export type NearbyHelper = {
   id: string;
@@ -49,9 +50,11 @@ const fmtDistance = (m: number) =>
 
 const DEFAULT_CENTER: [number, number] = [15.98, 45.81];
 
-// Free Carto basemap (no API key) — swap for MapTiler/Mapbox before launch.
-const MAP_STYLE =
+// Free Carto basemaps (no API key) — swap for MapTiler/Mapbox before launch.
+const LIGHT_STYLE =
   'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const DARK_STYLE =
+  'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 export function MapView({
   center = DEFAULT_CENTER,
@@ -63,6 +66,8 @@ export function MapView({
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const helperMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const dark = useTheme((s) => s.dark);
+  const styledDark = useRef(dark);
 
   // Create the map once; later center/zoom changes animate via flyTo below.
   // biome-ignore lint/correctness/useExhaustiveDependencies: init once
@@ -70,11 +75,13 @@ export function MapView({
     if (!containerRef.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: MAP_STYLE,
+      style: dark ? DARK_STYLE : LIGHT_STYLE,
       center,
       zoom,
+      // Clean, app-like map: no zoom/compass controls; attribution lives in
+      // the tiny footer link below instead of the default control.
+      attributionControl: false,
     });
-    map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
     mapRef.current = map;
     return () => {
       markerRef.current = null;
@@ -132,5 +139,38 @@ export function MapView({
     });
   }, [helpers]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  // Swap the basemap when the theme flips. Markers are DOM overlays and
+  // survive setStyle, so they stay put.
+  useEffect(() => {
+    if (styledDark.current === dark) return;
+    styledDark.current = dark;
+    mapRef.current?.setStyle(dark ? DARK_STYLE : LIGHT_STYLE);
+  }, [dark]);
+
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      {/* Licencno obavezna atribucija — sitni footer link umjesto default kontrole */}
+      <div className="absolute right-2 bottom-1 z-10 text-[10px] text-slate-400/90 dark:text-slate-500">
+        ©{' '}
+        <a
+          href="https://carto.com/attributions"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:underline"
+        >
+          CARTO
+        </a>{' '}
+        · ©{' '}
+        <a
+          href="https://www.openstreetmap.org/copyright"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:underline"
+        >
+          OpenStreetMap
+        </a>
+      </div>
+    </div>
+  );
 }

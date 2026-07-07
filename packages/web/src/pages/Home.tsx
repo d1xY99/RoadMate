@@ -151,7 +151,7 @@ function MapHome() {
 
       {/* Gornja traka */}
       <header className="pointer-events-none absolute inset-x-0 top-0 z-20 p-3 sm:p-4">
-        <div className="pointer-events-auto mx-auto flex max-w-3xl animate-fade-down items-center justify-between gap-3 rounded-2xl border border-white/50 bg-white/75 px-4 py-2.5 shadow-lg backdrop-blur-md">
+        <div className="pointer-events-auto mx-auto flex max-w-3xl animate-fade-down items-center justify-between gap-3 rounded-2xl border border-white/30 bg-white/30 px-4 py-2.5 shadow-lg backdrop-blur-md backdrop-saturate-150 dark:border-white/10 dark:bg-slate-800/30">
           <Logo />
           <div className="flex items-center gap-2">
             {isAdmin && (
@@ -189,7 +189,7 @@ function MapHome() {
           </div>
         )}
         {center && helpersQ.isSuccess && (
-          <div className="pointer-events-auto mx-auto mt-2 flex w-fit animate-fade-down items-center gap-2 rounded-full border border-white/50 bg-white/80 px-4 py-1.5 font-medium text-slate-700 text-xs shadow backdrop-blur">
+          <div className="pointer-events-auto mx-auto mt-2 flex w-fit animate-fade-down items-center gap-2 rounded-full border border-white/30 bg-white/30 px-4 py-1.5 font-medium text-slate-700 text-xs shadow backdrop-blur-md backdrop-saturate-150 dark:border-white/10 dark:bg-slate-800/30 dark:text-slate-200">
             <span
               className={`inline-block h-2 w-2 rounded-full ${
                 helpers.length ? 'bg-green-500' : 'bg-slate-300'
@@ -209,7 +209,7 @@ function MapHome() {
             <HelperToggle />
           </div>
           {activeRequest ? (
-            <div className="animate-fade-up rounded-2xl border border-slate-100 bg-white p-4 shadow-xl">
+            <div className="animate-fade-up rounded-2xl border border-white/30 bg-white/30 p-4 shadow-xl backdrop-blur-md backdrop-saturate-150 dark:border-white/10 dark:bg-slate-800/30">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-2.5 w-2.5">
@@ -217,10 +217,10 @@ function MapHome() {
                     <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
                   </span>
                   <div>
-                    <div className="font-semibold text-slate-900">
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">
                       Aktivan zahtjev — {PROBLEM_LABELS[activeRequest.type]}
                     </div>
-                    <div className="text-slate-500 text-xs">
+                    <div className="text-slate-500 text-xs dark:text-slate-400">
                       {activeRequest.status === 'open'
                         ? 'Čeka pomagača…'
                         : 'Pomagač je prihvatio.'}
