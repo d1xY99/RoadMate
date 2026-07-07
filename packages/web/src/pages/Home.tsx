@@ -159,11 +159,17 @@ function MapHome() {
             {isAdmin && (
               <Link
                 to="/admin-dashboard"
-                className="hidden rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 sm:block"
+                className="hidden rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 sm:block dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Admin
               </Link>
             )}
+            <Link
+              to="/requests"
+              className="rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              Zahtjevi
+            </Link>
             <Link
               to="/profile"
               className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pr-3 pl-1 shadow-sm transition hover:bg-slate-50"

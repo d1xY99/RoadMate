@@ -10,6 +10,7 @@ import { AuthConfirm } from '@/pages/AuthConfirm';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
+import { MyRequests } from '@/pages/MyRequests';
 import { Profile } from '@/pages/Profile';
 import { Register } from '@/pages/Register';
 import { RequestDetail } from '@/pages/RequestDetail';
@@ -83,6 +84,16 @@ const requestDetailRoute = createRoute({
   ),
 });
 
+const myRequestsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/requests',
+  component: () => (
+    <RequireAuth>
+      <MyRequests />
+    </RequireAuth>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -93,6 +104,7 @@ const routeTree = rootRoute.addChildren([
   adminRoute,
   profileRoute,
   requestDetailRoute,
+  myRequestsRoute,
 ]);
 
 export const router = createRouter({ routeTree });
