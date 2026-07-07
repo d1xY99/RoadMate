@@ -102,6 +102,22 @@ function MapHome() {
     );
   }, []);
 
+  // Recenter the map on the user's current position (MapView flyTo animates it).
+  const locateMe = () => {
+    if (!navigator.geolocation) {
+      setGeoError(true);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCenter([pos.coords.longitude, pos.coords.latitude]);
+        setGeoError(false);
+      },
+      () => setGeoError(true),
+      { enableHighAccuracy: true, timeout: 10_000 },
+    );
+  };
+
   // Latest open/accepted request by this user (#9: active request state).
   const activeQ = useQuery({
     queryKey: ['active-request', session?.user.id],
@@ -218,6 +234,33 @@ function MapHome() {
         className="absolute top-20 right-4 z-20 flex h-12 w-12 animate-fade-down items-center justify-center rounded-full bg-red-500 font-bold text-sm text-white shadow-lg ring-4 ring-red-500/25 transition hover:bg-red-600 active:scale-95 sm:top-24"
       >
         SOS
+      </button>
+
+      {/* Centriraj na moju lokaciju */}
+      <button
+        type="button"
+        onClick={locateMe}
+        aria-label="Centriraj na moju lokaciju"
+        className="absolute right-4 bottom-48 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/60 text-slate-700 shadow-lg backdrop-blur-md transition hover:bg-white active:scale-95 dark:border-white/10 dark:bg-slate-800/60 dark:text-slate-200"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="12" x2="12" y1="2" y2="4" />
+          <line x1="12" x2="12" y1="20" y2="22" />
+          <line x1="2" x2="4" y1="12" y2="12" />
+          <line x1="20" x2="22" y1="12" y2="12" />
+          <circle cx="12" cy="12" r="7" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+        </svg>
       </button>
 
       {/* Donje akcije */}
