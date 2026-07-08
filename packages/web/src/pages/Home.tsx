@@ -241,7 +241,7 @@ function MapHome() {
         type="button"
         onClick={locateMe}
         aria-label="Centriraj na moju lokaciju"
-        className="absolute right-4 bottom-48 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/60 text-slate-700 shadow-lg backdrop-blur-md transition hover:bg-white active:scale-95 dark:border-white/10 dark:bg-slate-800/60 dark:text-slate-200"
+        className="absolute right-4 bottom-48 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/30 text-slate-700 shadow-lg backdrop-blur-md backdrop-saturate-150 transition active:scale-95 dark:border-white/10 dark:bg-slate-800/30 dark:text-slate-200"
       >
         <svg
           width="20"
