@@ -90,6 +90,9 @@ Required GitHub Actions **secrets**, split across two environments
 | `SUPABASE_PRODUCTION_PROJECT_REF` | the prod project ref (e.g. `ffqkwegpdtriypbumfss`) |
 | `SUPABASE_PRODUCTION_DB_PASSWORD` | the prod database password |
 | `NETLIFY_PRODUCTION_BUILD_HOOK` | Netlify build hook URL that builds `main` |
+| `PRODUCTION_WEB_URL` | optional production frontend URL for deploy smoke checks |
+| `PRODUCTION_API_HEALTH_URL` | optional production backend `/health` URL for deploy smoke checks |
+| `DISCORD_PRODUCTION_DEPLOY_WEBHOOK` | optional Discord webhook for production deploy notifications |
 
 **`staging`** environment:
 
@@ -97,6 +100,9 @@ Required GitHub Actions **secrets**, split across two environments
 |--------|-------|
 | `SUPABASE_STAGING_DB_URL` | full session-pooler connection string (staging Connect → Session pooler) |
 | `NETLIFY_STAGING_BUILD_HOOK` | Netlify build hook URL that builds the `staging` branch |
+| `STAGING_WEB_URL` | optional staging frontend URL for deploy smoke checks |
+| `STAGING_API_HEALTH_URL` | optional staging backend `/health` URL for deploy smoke checks |
+| `DISCORD_STAGING_DEPLOY_WEBHOOK` | optional Discord webhook for staging deploy notifications |
 
 > Build hooks: Netlify → Site config → Build & deploy → **Build hooks** → create
 > one per environment (set the branch it builds), copy the URL into the secret.
@@ -113,6 +119,9 @@ Required GitHub Actions **secrets**, split across two environments
 ```bash
 bun run lint        # biome
 bun run typecheck   # tsc --noEmit across packages
+bun run test        # unit and feature tests
+bun run build       # production builds
+cd packages/web && bun run test:e2e  # Playwright smoke tests
 bun run test        # bun test
 ```
 
@@ -133,5 +142,3 @@ bun run preview      # serve the production build locally
 - **Web-first MVP.** Ship a PWA fast to validate the loop with the community;
   go native (push + background location) once it's proven. Keep all non-UI logic
   in `packages/shared` so the native port reuses the brains, not the screens.
-
-

@@ -27,6 +27,10 @@ jobs:
       TARGET: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || (github.ref_name == 'main' && 'production') || 'staging' }}
       DISCORD_PRODUCTION_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_PRODUCTION_DEPLOY_WEBHOOK }}
       DISCORD_STAGING_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_STAGING_DEPLOY_WEBHOOK }}
+      PRODUCTION_API_HEALTH_URL: ${{ secrets.PRODUCTION_API_HEALTH_URL }}
+      PRODUCTION_WEB_URL: ${{ secrets.PRODUCTION_WEB_URL }}
+      STAGING_API_HEALTH_URL: ${{ secrets.STAGING_API_HEALTH_URL }}
+      STAGING_WEB_URL: ${{ secrets.STAGING_WEB_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -66,6 +70,33 @@ jobs:
           fi
           curl -fsS -X POST -d '{}' "$HOOK" >/dev/null
           echo "Triggered Netlify build for $TARGET"
+
+      - name: Smoke deployed URLs
+        run: |
+          if [ "$TARGET" = "production" ]; then
+            WEB_URL="$PRODUCTION_WEB_URL"
+            API_HEALTH_URL="$PRODUCTION_API_HEALTH_URL"
+          else
+            WEB_URL="$STAGING_WEB_URL"
+            API_HEALTH_URL="$STAGING_API_HEALTH_URL"
+          fi
+
+          if [ -z "$WEB_URL" ] && [ -z "$API_HEALTH_URL" ]; then
+            echo "::warning::No smoke URLs configured for '$TARGET'."
+            exit 0
+          fi
+
+          if [ -n "$WEB_URL" ]; then
+            curl --retry 6 --retry-delay 10 --retry-all-errors -fsS "$WEB_URL" \
+              | grep -q "RoadMate"
+            echo "Frontend smoke check passed: $WEB_URL"
+          fi
+
+          if [ -n "$API_HEALTH_URL" ]; then
+            curl --retry 6 --retry-delay 10 --retry-all-errors -fsS "$API_HEALTH_URL" \
+              | jq -e '.status == "ok"' >/dev/null
+            echo "Backend smoke check passed: $API_HEALTH_URL"
+          fi
 
       - name: Notify Discord
         if: always()
