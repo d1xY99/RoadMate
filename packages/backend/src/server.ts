@@ -7,11 +7,14 @@ import { createProfileHandler } from './profiles/handler';
 import type { ProfileService } from './profiles/service';
 import { createUserHandler } from './users/handler';
 import type { UserService } from './users/service';
+import { createVehicleHandler } from './vehicles/handler';
+import type { VehicleService } from './vehicles/service';
 
 export type ServerDeps = {
   authService: AuthService;
   userService: UserService;
   profileService: ProfileService;
+  vehicleService: VehicleService;
 };
 
 export const createServer = (deps: ServerDeps) =>
@@ -26,6 +29,7 @@ export const createServer = (deps: ServerDeps) =>
         userService: deps.userService,
         profileService: deps.profileService,
       }),
-    );
+    )
+    .use(createVehicleHandler(deps.vehicleService));
 
 export type Server = ReturnType<typeof createServer>;
