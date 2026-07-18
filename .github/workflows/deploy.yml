@@ -25,6 +25,8 @@ jobs:
     environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || (github.ref_name == 'main' && 'production') || 'staging' }}
     env:
       TARGET: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || (github.ref_name == 'main' && 'production') || 'staging' }}
+      DISCORD_PRODUCTION_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_PRODUCTION_DEPLOY_WEBHOOK }}
+      DISCORD_STAGING_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_STAGING_DEPLOY_WEBHOOK }}
     steps:
       - uses: actions/checkout@v4
 
@@ -64,3 +66,59 @@ jobs:
           fi
           curl -fsS -X POST -d '{}' "$HOOK" >/dev/null
           echo "Triggered Netlify build for $TARGET"
+
+      - name: Notify Discord
+        if: always()
+        env:
+          STATUS: ${{ job.status }}
+        run: |
+          if [ "$TARGET" = "production" ]; then
+            WEBHOOK="$DISCORD_PRODUCTION_DEPLOY_WEBHOOK"
+            LABEL="production"
+          else
+            WEBHOOK="$DISCORD_STAGING_DEPLOY_WEBHOOK"
+            LABEL="staging"
+          fi
+
+          if [ -z "$WEBHOOK" ]; then
+            echo "::warning::No Discord deploy webhook configured for '$TARGET'."
+            exit 0
+          fi
+
+          if [ "$STATUS" = "success" ]; then
+            TITLE="RoadMate $LABEL deployed"
+            COLOR="3066993"
+          else
+            TITLE="RoadMate $LABEL deploy failed"
+            COLOR="15158332"
+          fi
+
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+
+          PAYLOAD="$(jq -nc \
+            --arg title "$TITLE" \
+            --arg target "$TARGET" \
+            --arg branch "$GITHUB_REF_NAME" \
+            --arg sha "$SHORT_SHA" \
+            --arg actor "$GITHUB_ACTOR" \
+            --arg url "$RUN_URL" \
+            --argjson color "$COLOR" \
+            '{
+              embeds: [{
+                title: $title,
+                color: $color,
+                fields: [
+                  { name: "Environment", value: $target, inline: true },
+                  { name: "Branch", value: $branch, inline: true },
+                  { name: "Commit", value: $sha, inline: true },
+                  { name: "Actor", value: $actor, inline: true }
+                ],
+                url: $url
+              }]
+            }')"
+
+          curl -fsS \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$WEBHOOK"
