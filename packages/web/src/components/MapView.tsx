@@ -83,7 +83,16 @@ export function MapView({
       attributionControl: false,
     });
     mapRef.current = map;
+
+    // Safety net: if the container isn't fully laid out when the map inits, the
+    // GL canvas can stick at its default size. Resize once loaded and on any
+    // later container resize.
+    map.once('load', () => map.resize());
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(containerRef.current);
+
     return () => {
+      ro.disconnect();
       markerRef.current = null;
       map.remove();
       mapRef.current = null;

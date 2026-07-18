@@ -28,9 +28,11 @@ function ThumbIcon({ down = false }: { down?: boolean }) {
 export function RequestFeedback({
   requestId,
   toUser,
+  onSubmitted,
 }: {
   requestId: string;
   toUser: string;
+  onSubmitted?: () => void;
 }) {
   const uid = useAuth((s) => s.session?.user.id);
   const [positive, setPositive] = useState<boolean | null>(null);
@@ -70,6 +72,7 @@ export function RequestFeedback({
       return;
     }
     existingQ.refetch();
+    onSubmitted?.();
   };
 
   if (existingQ.isLoading) return null;
