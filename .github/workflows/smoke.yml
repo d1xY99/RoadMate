@@ -1,9 +1,5 @@
-name: Deploy
+name: Smoke Tests
 
-# One deploy per environment: applies DB migrations + triggers the Netlify
-# build for that environment.
-#   push to staging -> staging      push to main -> production
-#   or run manually (Actions tab) and pick the environment.
 on:
   workflow_dispatch:
     inputs:
@@ -12,60 +8,61 @@ on:
         type: choice
         options: [staging, production]
         required: true
-  push:
+  workflow_run:
+    workflows: [Deploy]
+    types: [completed]
     branches: [main, staging]
 
 concurrency:
-  group: deploy-${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || github.ref_name }}
+  group: smoke-${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || (github.ref_name == 'main' && 'production') || 'staging' }}
+    environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || (github.event.workflow_run.head_branch == 'main' && 'production') || 'staging' }}
     env:
-      TARGET: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || (github.ref_name == 'main' && 'production') || 'staging' }}
+      TARGET: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || (github.event.workflow_run.head_branch == 'main' && 'production') || 'staging' }}
       DISCORD_PRODUCTION_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_PRODUCTION_DEPLOY_WEBHOOK }}
       DISCORD_STAGING_DEPLOY_WEBHOOK: ${{ secrets.DISCORD_STAGING_DEPLOY_WEBHOOK }}
+      PRODUCTION_API_HEALTH_URL: ${{ secrets.PRODUCTION_API_HEALTH_URL }}
+      PRODUCTION_WEB_URL: ${{ secrets.PRODUCTION_WEB_URL }}
+      STAGING_API_HEALTH_URL: ${{ secrets.STAGING_API_HEALTH_URL }}
+      STAGING_WEB_URL: ${{ secrets.STAGING_WEB_URL }}
+      SMOKE_BRANCH: ${{ (github.event_name == 'workflow_dispatch' && github.ref_name) || github.event.workflow_run.head_branch }}
+      SMOKE_SHA: ${{ (github.event_name == 'workflow_dispatch' && github.sha) || github.event.workflow_run.head_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Wait for deploys to settle
+        run: sleep 60
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.13
-
-      - run: bun install --frozen-lockfile
-
-      - name: Apply DB migrations
-        env:
-          PROD_REF: ${{ secrets.SUPABASE_PRODUCTION_PROJECT_REF }}
-          PROD_PW: ${{ secrets.SUPABASE_PRODUCTION_DB_PASSWORD }}
-          STAGING_DB_URL: ${{ secrets.SUPABASE_STAGING_DB_URL }}
+      - name: Smoke deployed URLs
         run: |
           if [ "$TARGET" = "production" ]; then
-            ENC=$(jq -rn --arg x "$PROD_PW" '$x|@uri')
-            DB_URL="postgresql://postgres.${PROD_REF}:${ENC}@aws-1-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require"
+            WEB_URL="$PRODUCTION_WEB_URL"
+            API_HEALTH_URL="$PRODUCTION_API_HEALTH_URL"
           else
-            DB_URL="$STAGING_DB_URL"
+            WEB_URL="$STAGING_WEB_URL"
+            API_HEALTH_URL="$STAGING_API_HEALTH_URL"
           fi
-          if [ -z "$DB_URL" ]; then
-            echo "::error::No database URL resolved for '$TARGET' — check environment secrets."
+
+          if [ -z "$WEB_URL" ]; then
+            echo "::error::No frontend smoke URL configured for '$TARGET'."
             exit 1
           fi
-          bunx dbmate --migrations-dir ./packages/backend/migrations --no-dump-schema --url "$DB_URL" up
 
-      - name: Trigger Netlify build
-        env:
-          PROD_HOOK: ${{ secrets.NETLIFY_PRODUCTION_BUILD_HOOK }}
-          STAGING_HOOK: ${{ secrets.NETLIFY_STAGING_BUILD_HOOK }}
-        run: |
-          if [ "$TARGET" = "production" ]; then HOOK="$PROD_HOOK"; else HOOK="$STAGING_HOOK"; fi
-          if [ -z "$HOOK" ]; then
-            echo "::warning::No Netlify build hook for '$TARGET' — skipping web deploy."
-            exit 0
+          if [ -z "$API_HEALTH_URL" ]; then
+            echo "::error::No backend health URL configured for '$TARGET'."
+            exit 1
           fi
-          curl -fsS -X POST -d '{}' "$HOOK" >/dev/null
-          echo "Triggered Netlify build for $TARGET"
+
+          curl --retry 6 --retry-delay 10 --retry-all-errors -fsS "$WEB_URL" \
+            | grep -q "RoadMate"
+          echo "Frontend smoke check passed: $WEB_URL"
+
+          curl --retry 6 --retry-delay 10 --retry-all-errors -fsS "$API_HEALTH_URL" \
+            | jq -e '.status == "ok"' >/dev/null
+          echo "Backend smoke check passed: $API_HEALTH_URL"
 
       - name: Notify Discord
         if: always()
@@ -86,29 +83,27 @@ jobs:
           fi
 
           if [ "$STATUS" = "success" ]; then
-            TITLE="Deployment completed"
-            DESCRIPTION="RoadMate $LABEL deploy finished successfully."
+            TITLE="Smoke tests passed"
+            DESCRIPTION="RoadMate $LABEL frontend and backend smoke checks passed."
             STATE="Success"
             COLOR="3066993"
           else
-            TITLE="Deployment failed"
-            DESCRIPTION="RoadMate $LABEL deploy needs attention."
+            TITLE="Smoke tests failed"
+            DESCRIPTION="RoadMate $LABEL smoke checks need attention."
             STATE="Failed"
             COLOR="15158332"
           fi
 
           RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          COMMIT_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
-          SHORT_SHA="${GITHUB_SHA::7}"
+          SHORT_SHA="${SMOKE_SHA::7}"
 
           PAYLOAD="$(jq -nc \
             --arg title "$TITLE" \
             --arg description "$DESCRIPTION" \
             --arg state "$STATE" \
             --arg target "$TARGET" \
-            --arg branch "$GITHUB_REF_NAME" \
+            --arg branch "$SMOKE_BRANCH" \
             --arg sha "$SHORT_SHA" \
-            --arg commit_url "$COMMIT_URL" \
             --arg actor "$GITHUB_ACTOR" \
             --arg url "$RUN_URL" \
             --arg repo "$GITHUB_REPOSITORY" \
@@ -124,7 +119,7 @@ jobs:
                   { name: "Status", value: $state, inline: true },
                   { name: "Environment", value: $target, inline: true },
                   { name: "Branch", value: $branch, inline: true },
-                  { name: "Commit", value: ("[" + $sha + "](" + $commit_url + ")"), inline: true },
+                  { name: "Commit", value: $sha, inline: true },
                   { name: "Triggered by", value: $actor, inline: true },
                   { name: "Workflow", value: ("[Open run](" + $url + ")"), inline: true }
                 ],
