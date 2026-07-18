@@ -9,6 +9,7 @@ import {
 } from '@/components/HelpRequestForm';
 import { Logo } from '@/components/Logo';
 import { MapView, type NearbyHelper } from '@/components/MapView';
+import { NearbyRequests } from '@/components/NearbyRequests';
 import { SosSheet } from '@/components/SosSheet';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -17,6 +18,8 @@ type ActiveRequest = {
   id: string;
   type: ProblemType;
   status: 'open' | 'accepted';
+  requester_id: string;
+  helper_id: string | null;
 };
 
 const DEFAULT_CENTER: [number, number] = [15.98, 45.81];
@@ -89,6 +92,7 @@ function MapHome() {
   const [geoError, setGeoError] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [sosOpen, setSosOpen] = useState(false);
+  const [helperAvailable, setHelperAvailable] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -118,15 +122,18 @@ function MapHome() {
     );
   };
 
-  // Latest open/accepted request by this user (#9: active request state).
+  // Latest active request this user is involved in — either as requester (#9)
+  // or as the accepted helper (#24), so both sides get a jump-in card.
   const activeQ = useQuery({
     queryKey: ['active-request', session?.user.id],
     enabled: !!session,
+    refetchInterval: 20_000,
     queryFn: async () => {
+      const uid = session?.user.id as string;
       const { data, error } = await supabase
         .from('help_requests')
-        .select('id, type, status')
-        .eq('requester_id', session?.user.id as string)
+        .select('id, type, status, requester_id, helper_id')
+        .or(`requester_id.eq.${uid},helper_id.eq.${uid}`)
         .in('status', ['open', 'accepted'])
         .order('created_at', { ascending: false })
         .limit(1)
@@ -136,6 +143,8 @@ function MapHome() {
     },
   });
   const activeRequest = activeQ.data ?? null;
+  const helpingAsHelper =
+    !!activeRequest && activeRequest.helper_id === session?.user.id;
 
   // Nearby available helpers (#10); auto-refresh while the map is open.
   const helpersQ = useQuery({
@@ -267,8 +276,9 @@ function MapHome() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-4 pb-6">
         <div className="pointer-events-auto mx-auto flex w-full max-w-md flex-col gap-3">
           <div className="animate-fade-up" style={{ animationDelay: '0.15s' }}>
-            <HelperToggle />
+            <HelperToggle onAvailabilityChange={setHelperAvailable} />
           </div>
+          {center && helperAvailable && <NearbyRequests center={center} />}
           {activeRequest ? (
             <div className="animate-fade-up rounded-2xl border border-white/30 bg-white/30 p-4 shadow-xl backdrop-blur-md backdrop-saturate-150 dark:border-white/10 dark:bg-slate-800/30">
               <div className="flex items-center justify-between gap-3">
@@ -279,12 +289,15 @@ function MapHome() {
                   </span>
                   <div>
                     <div className="font-semibold text-slate-900 dark:text-slate-100">
-                      Aktivan zahtjev — {PROBLEM_LABELS[activeRequest.type]}
+                      {helpingAsHelper ? 'Pomažeš' : 'Aktivan zahtjev'} —{' '}
+                      {PROBLEM_LABELS[activeRequest.type]}
                     </div>
                     <div className="text-slate-500 text-xs dark:text-slate-400">
-                      {activeRequest.status === 'open'
-                        ? 'Čeka pomagača…'
-                        : 'Pomagač je prihvatio.'}
+                      {helpingAsHelper
+                        ? 'U tijeku — otvori za praćenje i chat.'
+                        : activeRequest.status === 'open'
+                          ? 'Čeka pomagača…'
+                          : 'Pomagač je prihvatio.'}
                     </div>
                   </div>
                 </div>

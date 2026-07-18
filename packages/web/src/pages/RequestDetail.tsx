@@ -4,6 +4,7 @@ import { PROBLEM_LABELS, type ProblemType } from '@/components/HelpRequestForm';
 import { Logo } from '@/components/Logo';
 import { RequestChat } from '@/components/RequestChat';
 import { RequestFeedback } from '@/components/RequestFeedback';
+import { RequestOffers } from '@/components/RequestOffers';
 import { RequestTracking } from '@/components/RequestTracking';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -216,6 +217,14 @@ export function RequestDetail() {
           </dl>
         </div>
 
+        {/* Ponude (#24) — dok je zahtjev otvoren, tražitelj bira pomagača */}
+        {request.status === 'open' && request.requester_id === uid && (
+          <RequestOffers
+            requestId={request.id}
+            onAccepted={() => requestQ.refetch()}
+          />
+        )}
+
         {/* Live praćenje (#28) — nakon prihvata */}
         {request.status === 'accepted' && (
           <RequestTracking
@@ -270,7 +279,11 @@ export function RequestDetail() {
             const toUser =
               role === 'requester' ? request.helper_id : request.requester_id;
             return toUser ? (
-              <RequestFeedback requestId={request.id} toUser={toUser} />
+              <RequestFeedback
+                requestId={request.id}
+                toUser={toUser}
+                onSubmitted={() => helperQ.refetch()}
+              />
             ) : null;
           })()}
 

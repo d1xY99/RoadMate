@@ -75,7 +75,8 @@ staging or prod. The flow:
 2. Open a PR → CI (`db-validate`) applies it up→down→up on a throwaway Supabase.
 3. Push/merge to **`staging`** → CI **`deploy`** runs DB migration + Netlify build (staging).
 4. Merge to **`main`** → CI **`deploy`** runs DB migration + Netlify build (production).
-5. Or run **`deploy`** manually (Actions tab → Run workflow → pick environment).
+5. After deploy completes, **`Smoke Tests`** checks the deployed frontend and backend health URL.
+6. Or run **`deploy`** / **`Smoke Tests`** manually (Actions tab → Run workflow → pick environment).
 
 The single **`deploy`** workflow handles one environment per run: it applies the
 DB migration and triggers the matching Netlify build.
@@ -90,6 +91,9 @@ Required GitHub Actions **secrets**, split across two environments
 | `SUPABASE_PRODUCTION_PROJECT_REF` | the prod project ref (e.g. `ffqkwegpdtriypbumfss`) |
 | `SUPABASE_PRODUCTION_DB_PASSWORD` | the prod database password |
 | `NETLIFY_PRODUCTION_BUILD_HOOK` | Netlify build hook URL that builds `main` |
+| `PRODUCTION_WEB_URL` | production frontend URL for smoke checks |
+| `PRODUCTION_API_HEALTH_URL` | production backend `/health` URL for smoke checks |
+| `DISCORD_PRODUCTION_DEPLOY_WEBHOOK` | optional Discord webhook for production deploy notifications |
 
 **`staging`** environment:
 
@@ -97,6 +101,9 @@ Required GitHub Actions **secrets**, split across two environments
 |--------|-------|
 | `SUPABASE_STAGING_DB_URL` | full session-pooler connection string (staging Connect → Session pooler) |
 | `NETLIFY_STAGING_BUILD_HOOK` | Netlify build hook URL that builds the `staging` branch |
+| `STAGING_WEB_URL` | staging frontend URL for smoke checks |
+| `STAGING_API_HEALTH_URL` | staging backend `/health` URL for smoke checks |
+| `DISCORD_STAGING_DEPLOY_WEBHOOK` | optional Discord webhook for staging deploy notifications |
 
 > Build hooks: Netlify → Site config → Build & deploy → **Build hooks** → create
 > one per environment (set the branch it builds), copy the URL into the secret.
@@ -113,6 +120,9 @@ Required GitHub Actions **secrets**, split across two environments
 ```bash
 bun run lint        # biome
 bun run typecheck   # tsc --noEmit across packages
+bun run test        # unit and feature tests
+bun run build       # production builds
+cd packages/web && bun run test:e2e  # Playwright smoke tests
 bun run test        # bun test
 ```
 
@@ -133,5 +143,3 @@ bun run preview      # serve the production build locally
 - **Web-first MVP.** Ship a PWA fast to validate the loop with the community;
   go native (push + background location) once it's proven. Keep all non-UI logic
   in `packages/shared` so the native port reuses the brains, not the screens.
-
-
