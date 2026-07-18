@@ -65,9 +65,7 @@ jobs:
           echo "Backend smoke check passed: $API_HEALTH_URL"
 
       - name: Notify Discord
-        if: always()
-        env:
-          STATUS: ${{ job.status }}
+        if: failure()
         run: |
           if [ "$TARGET" = "production" ]; then
             WEBHOOK="$DISCORD_PRODUCTION_DEPLOY_WEBHOOK"
@@ -82,17 +80,10 @@ jobs:
             exit 0
           fi
 
-          if [ "$STATUS" = "success" ]; then
-            TITLE="Smoke tests passed"
-            DESCRIPTION="RoadMate $LABEL frontend and backend smoke checks passed."
-            STATE="Success"
-            COLOR="3066993"
-          else
-            TITLE="Smoke tests failed"
-            DESCRIPTION="RoadMate $LABEL smoke checks need attention."
-            STATE="Failed"
-            COLOR="15158332"
-          fi
+          TITLE="Smoke tests failed"
+          DESCRIPTION="RoadMate $LABEL smoke checks need attention."
+          STATE="Failed"
+          COLOR="15158332"
 
           RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           SHORT_SHA="${SMOKE_SHA::7}"
