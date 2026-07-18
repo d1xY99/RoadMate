@@ -31,7 +31,11 @@ async function pushLocation(available: boolean) {
 
 // Helper mode toggle (#11): mark yourself available and stream location, or go
 // offline. Reads current availability once, then owns it.
-export function HelperToggle() {
+export function HelperToggle({
+  onAvailabilityChange,
+}: {
+  onAvailabilityChange?: (available: boolean) => void;
+} = {}) {
   const uid = useAuth((s) => s.session?.user.id);
   const [available, setAvailable] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -64,6 +68,7 @@ export function HelperToggle() {
       .then(({ data }) => {
         if (!active || !data) return;
         setAvailable(data.is_available);
+        onAvailabilityChange?.(data.is_available);
         if (data.is_available) startPinging();
       });
     return () => {
@@ -79,6 +84,7 @@ export function HelperToggle() {
     try {
       await pushLocation(next);
       setAvailable(next);
+      onAvailabilityChange?.(next);
       if (next) startPinging();
       else stopPinging();
     } catch (e) {
