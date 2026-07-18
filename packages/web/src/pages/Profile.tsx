@@ -14,6 +14,12 @@ import { Logo } from '@/components/Logo';
 import { ThemePicker } from '@/components/ThemePicker';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import {
+  type DecodedVehicle,
+  decodeVin,
+  normalizeVin,
+  VinDecodeError,
+} from '@/lib/vin';
 
 type VehicleType = 'car' | 'van' | 'truck' | 'motorcycle' | 'suv_4x4';
 
@@ -25,6 +31,25 @@ type Profile = {
   vehicle_type: VehicleType | null;
   thumbs_up: number;
   thumbs_down: number;
+};
+
+type SavedVehicle = {
+  id: string;
+  vin: string;
+  make: string | null;
+  model: string | null;
+  model_year: number | null;
+  raw_decode: Record<string, string | null> | null;
+  trim: string | null;
+  body_class: string | null;
+  vehicle_type: string | null;
+  fuel_type: string | null;
+  engine: string | null;
+  transmission: string | null;
+  drive_type: string | null;
+  manufacturer: string | null;
+  plant_country: string | null;
+  created_at: string;
 };
 
 const VEHICLES: { value: VehicleType; label: string }[] = [
@@ -140,6 +165,132 @@ function CameraIcon() {
   );
 }
 
+function PlusIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
+  );
+}
+
+function formatVehicleTitle(vehicle: SavedVehicle | DecodedVehicle) {
+  const year = 'model_year' in vehicle ? vehicle.model_year : vehicle.modelYear;
+  const raw = 'raw_decode' in vehicle ? vehicle.raw_decode : vehicle.raw;
+  const series = 'series' in vehicle ? vehicle.series : raw?.Series;
+  const parts = [year, vehicle.make, vehicle.model, series].filter(Boolean);
+  return parts.length ? parts.join(' ') : vehicle.vin;
+}
+
+function vehicleRows(vehicle: SavedVehicle | DecodedVehicle) {
+  const raw = 'raw_decode' in vehicle ? vehicle.raw_decode : vehicle.raw;
+  const modelYear =
+    'model_year' in vehicle ? vehicle.model_year : vehicle.modelYear;
+  const bodyClass =
+    'body_class' in vehicle ? vehicle.body_class : vehicle.bodyClass;
+  const vehicleType =
+    'vehicle_type' in vehicle ? vehicle.vehicle_type : vehicle.vehicleType;
+  const fuelType =
+    'fuel_type' in vehicle ? vehicle.fuel_type : vehicle.fuelType;
+  const driveType =
+    'drive_type' in vehicle ? vehicle.drive_type : vehicle.driveType;
+  const plantCountry =
+    'plant_country' in vehicle ? vehicle.plant_country : vehicle.plantCountry;
+  const plantCity = 'plantCity' in vehicle ? vehicle.plantCity : raw?.PlantCity;
+  const doors = 'doors' in vehicle ? vehicle.doors : raw?.Doors;
+  const seats = 'seats' in vehicle ? vehicle.seats : raw?.Seats;
+  const seatBelts =
+    'seatBelts' in vehicle ? vehicle.seatBelts : raw?.SeatBeltsAll;
+  const airbagsFront =
+    'airbagsFront' in vehicle ? vehicle.airbagsFront : raw?.AirBagLocFront;
+  const tpms = 'tpms' in vehicle ? vehicle.tpms : raw?.TPMS;
+  const descriptor =
+    'vehicleDescriptor' in vehicle
+      ? vehicle.vehicleDescriptor
+      : raw?.VehicleDescriptor;
+
+  return [
+    ['Godiste', modelYear],
+    ['Serija', raw?.Series],
+    ['Trim', vehicle.trim],
+    ['Karoserija', bodyClass],
+    ['Tip', vehicleType],
+    ['Gorivo', fuelType],
+    ['Motor', vehicle.engine],
+    ['Mjenjac', vehicle.transmission],
+    ['Pogon', driveType],
+    ['Vrata', doors],
+    ['Sjedista', seats],
+    ['Pojasevi', seatBelts],
+    ['Prednji airbag', airbagsFront],
+    ['TPMS', tpms],
+    ['Proizvodjac', vehicle.manufacturer],
+    ['Fabrika', plantCity],
+    ['Drzava sklapanja', plantCountry],
+    ['Descriptor', descriptor],
+  ].filter(([, value]) => value);
+}
+
+function decodeWarning(vehicle: SavedVehicle | DecodedVehicle) {
+  if ('decodeWarning' in vehicle) return vehicle.decodeWarning;
+  const code = vehicle.raw_decode?.ErrorCode;
+  if (!code || code === '0') return null;
+  return (
+    vehicle.raw_decode?.AdditionalErrorText || vehicle.raw_decode?.ErrorText
+  );
+}
+
 export function Profile() {
   const queryClient = useQueryClient();
   const session = useAuth((s) => s.session);
@@ -153,6 +304,17 @@ export function Profile() {
   const [ok, setOk] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
+  const [vinInput, setVinInput] = useState('');
+  const [decodedVehicle, setDecodedVehicle] = useState<DecodedVehicle | null>(
+    null,
+  );
+  const [vehicleError, setVehicleError] = useState<string | null>(null);
+  const [decodingVehicle, setDecodingVehicle] = useState(false);
+  const [savingVehicle, setSavingVehicle] = useState(false);
+  const [deletingVehicleId, setDeletingVehicleId] = useState<string | null>(
+    null,
+  );
   const fileRef = useRef<HTMLInputElement>(null);
 
   const profileQ = useQuery({
@@ -168,6 +330,22 @@ export function Profile() {
         .single();
       if (err) throw err;
       return data as Profile;
+    },
+  });
+
+  const vehiclesQ = useQuery({
+    queryKey: ['vehicles', uid],
+    enabled: !!uid,
+    queryFn: async () => {
+      const { data, error: err } = await supabase
+        .from('vehicles')
+        .select(
+          'id, vin, make, model, model_year, raw_decode, trim, body_class, vehicle_type, fuel_type, engine, transmission, drive_type, manufacturer, plant_country, created_at',
+        )
+        .eq('user_id', uid as string)
+        .order('created_at', { ascending: false });
+      if (err) throw err;
+      return (data ?? []) as unknown as SavedVehicle[];
     },
   });
 
@@ -233,6 +411,91 @@ export function Profile() {
     }
     setOk(true);
     queryClient.invalidateQueries({ queryKey: ['profile', uid] });
+  };
+
+  const resetVehicleModal = () => {
+    setVinInput('');
+    setDecodedVehicle(null);
+    setVehicleError(null);
+    setDecodingVehicle(false);
+    setSavingVehicle(false);
+  };
+
+  const onDecodeVehicle = async (e: FormEvent) => {
+    e.preventDefault();
+    setVehicleError(null);
+    setDecodedVehicle(null);
+    setDecodingVehicle(true);
+
+    try {
+      const vehicle = await decodeVin(vinInput);
+      setVinInput(vehicle.vin);
+      setDecodedVehicle(vehicle);
+    } catch (err) {
+      setVehicleError(
+        err instanceof VinDecodeError
+          ? err.message
+          : 'Nije moguce procitati podatke za ovaj VIN.',
+      );
+    } finally {
+      setDecodingVehicle(false);
+    }
+  };
+
+  const onSaveVehicle = async () => {
+    if (!uid || !decodedVehicle) return;
+    setVehicleError(null);
+    setSavingVehicle(true);
+
+    const { error: err } = await supabase.from('vehicles').upsert(
+      {
+        user_id: uid,
+        vin: decodedVehicle.vin,
+        make: decodedVehicle.make,
+        model: decodedVehicle.model,
+        model_year: decodedVehicle.modelYear,
+        trim: decodedVehicle.trim,
+        body_class: decodedVehicle.bodyClass,
+        vehicle_type: decodedVehicle.vehicleType,
+        fuel_type: decodedVehicle.fuelType,
+        engine: decodedVehicle.engine,
+        transmission: decodedVehicle.transmission,
+        drive_type: decodedVehicle.driveType,
+        manufacturer: decodedVehicle.manufacturer,
+        plant_country: decodedVehicle.plantCountry,
+        raw_decode: decodedVehicle.raw,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,vin' },
+    );
+
+    setSavingVehicle(false);
+    if (err) {
+      setVehicleError(err.message);
+      return;
+    }
+
+    setVehicleModalOpen(false);
+    resetVehicleModal();
+    queryClient.invalidateQueries({ queryKey: ['vehicles', uid] });
+  };
+
+  const onDeleteVehicle = async (vehicleId: string) => {
+    if (!uid) return;
+    setVehicleError(null);
+    setDeletingVehicleId(vehicleId);
+    const { error: err } = await supabase
+      .from('vehicles')
+      .delete()
+      .eq('id', vehicleId)
+      .eq('user_id', uid);
+    setDeletingVehicleId(null);
+
+    if (err) {
+      setVehicleError(err.message);
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ['vehicles', uid] });
   };
 
   if (loading || !session || profileQ.isLoading) {
@@ -370,6 +633,115 @@ export function Profile() {
           <HelperToggle />
         </div>
 
+        {/* Vozila */}
+        <section className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
+                Moja vozila
+              </h2>
+              <p className="mt-0.5 text-slate-500 text-sm dark:text-slate-400">
+                Dodaj vozilo pomocu VIN broja.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                resetVehicleModal();
+                setVehicleModalOpen(true);
+              }}
+              className="flex h-10 shrink-0 items-center gap-2 rounded-lg bg-slate-900 px-3 font-semibold text-sm text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+            >
+              <PlusIcon />
+              Dodaj
+            </button>
+          </div>
+
+          {vehiclesQ.isError && (
+            <div className="mt-5">
+              <Alert kind="error">
+                Vozila se trenutno ne mogu ucitati. Provjeri migraciju i RLS
+                pravila.
+              </Alert>
+            </div>
+          )}
+          {vehicleError && !vehicleModalOpen && (
+            <div className="mt-5">
+              <Alert kind="error">{vehicleError}</Alert>
+            </div>
+          )}
+
+          {vehiclesQ.isLoading ? (
+            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-500 text-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
+              Ucitavanje vozila...
+            </div>
+          ) : vehiclesQ.data?.length ? (
+            <div className="mt-5 space-y-3">
+              {vehiclesQ.data.map((vehicle) => (
+                <article
+                  key={vehicle.id}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                        {formatVehicleTitle(vehicle)}
+                      </h3>
+                      <p className="mt-0.5 font-mono text-slate-500 text-xs tracking-wide dark:text-slate-400">
+                        {vehicle.vin}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteVehicle(vehicle.id)}
+                      disabled={deletingVehicleId === vehicle.id}
+                      aria-label="Obrisi vozilo"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-red-900/60 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+                    >
+                      {deletingVehicleId === vehicle.id ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+                      ) : (
+                        <TrashIcon />
+                      )}
+                    </button>
+                  </div>
+
+                  <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    {vehicleRows(vehicle)
+                      .slice(0, 10)
+                      .map(([label, value]) => (
+                        <div key={label}>
+                          <dt className="text-slate-500 text-xs dark:text-slate-400">
+                            {label}
+                          </dt>
+                          <dd className="mt-0.5 font-medium text-slate-800 dark:text-slate-200">
+                            {value}
+                          </dd>
+                        </div>
+                      ))}
+                  </dl>
+                  {decodeWarning(vehicle) && (
+                    <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-xs dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                      Provider nije vratio kompletne podatke za ovaj VIN. Moguce
+                      je da baza nema model/godiste za ovaj VIN.
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center dark:border-slate-700 dark:bg-slate-950">
+              <p className="font-medium text-slate-800 dark:text-slate-200">
+                Nemas dodanih vozila.
+              </p>
+              <p className="mt-1 text-slate-500 text-sm dark:text-slate-400">
+                VIN ce automatski popuniti marku, model, godiste i osnovne
+                specifikacije.
+              </p>
+            </div>
+          )}
+        </section>
+
         {/* Podaci */}
         <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h2 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
@@ -443,6 +815,109 @@ export function Profile() {
 
         <ThemePicker />
       </main>
+
+      {vehicleModalOpen && (
+        <div className="fixed inset-0 z-40 flex items-end bg-slate-950/50 p-4 backdrop-blur-sm sm:items-center sm:justify-center">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="font-semibold text-xl text-slate-900 dark:text-slate-100">
+                  Dodaj vozilo
+                </h2>
+                <p className="mt-1 text-slate-500 text-sm dark:text-slate-400">
+                  Unesi VIN i RoadMate ce povuci dostupne podatke o vozilu.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setVehicleModalOpen(false);
+                  resetVehicleModal();
+                }}
+                aria-label="Zatvori"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+              >
+                x
+              </button>
+            </div>
+
+            <form onSubmit={onDecodeVehicle} className="mt-5 space-y-4">
+              {vehicleError && <Alert kind="error">{vehicleError}</Alert>}
+              <label className="block">
+                <span className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
+                  VIN
+                </span>
+                <input
+                  value={vinInput}
+                  onChange={(e) => {
+                    setVinInput(normalizeVin(e.target.value));
+                    setDecodedVehicle(null);
+                    setVehicleError(null);
+                  }}
+                  maxLength={17}
+                  autoComplete="off"
+                  placeholder="1HGCM82633A004352"
+                  className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 font-mono text-slate-900 text-sm uppercase tracking-wide outline-none transition placeholder:font-sans placeholder:tracking-normal placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={decodingVehicle}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand font-semibold text-sm text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {decodingVehicle ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                ) : (
+                  <SearchIcon />
+                )}
+                Pronadji podatke
+              </button>
+            </form>
+
+            {decodedVehicle && (
+              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                  {formatVehicleTitle(decodedVehicle)}
+                </h3>
+                <p className="mt-0.5 font-mono text-slate-500 text-xs tracking-wide dark:text-slate-400">
+                  {decodedVehicle.vin}
+                </p>
+                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                  {vehicleRows(decodedVehicle)
+                    .slice(0, 14)
+                    .map(([label, value]) => (
+                      <div key={label}>
+                        <dt className="text-slate-500 text-xs dark:text-slate-400">
+                          {label}
+                        </dt>
+                        <dd className="mt-0.5 font-medium text-slate-800 dark:text-slate-200">
+                          {value}
+                        </dd>
+                      </div>
+                    ))}
+                </dl>
+                {decodeWarning(decodedVehicle) && (
+                  <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-xs dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                    NHTSA je vratio samo djelimicne podatke. Za ovaj VIN nisu
+                    dostupni model, godiste ili dio specifikacija.
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={onSaveVehicle}
+                  disabled={savingVehicle}
+                  className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 font-semibold text-sm text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                >
+                  {savingVehicle && (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white dark:border-slate-400 dark:border-t-slate-900" />
+                  )}
+                  Sacuvaj vozilo
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
