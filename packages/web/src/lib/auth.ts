@@ -15,8 +15,14 @@ interface AuthState {
     password: string,
     fullName: string,
   ) => Promise<{ error: string | null; needsConfirmation: boolean }>;
+  resendVerification: (email: string) => Promise<string | null>;
+  requestPasswordReset: (email: string) => Promise<string | null>;
+  updatePassword: (password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
 }
+
+// Where Supabase sends users after they click the confirmation email link.
+const emailRedirectTo = `${window.location.origin}/auth/confirm`;
 
 export const useAuth = create<AuthState>((set, get) => ({
   session: null,
@@ -29,8 +35,9 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
   init: async () => {
     const { data } = await supabase.auth.getSession();
-    set({ session: data.session, loading: false });
+    // Load roles before clearing `loading` so admin guards don't flicker-redirect.
     if (data.session) await get().loadRoles();
+    set({ session: data.session, loading: false });
     supabase.auth.onAuthStateChange((_event, session) => {
       set({ session });
       if (session) get().loadRoles();
@@ -50,10 +57,28 @@ export const useAuth = create<AuthState>((set, get) => ({
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName }, emailRedirectTo },
     });
     if (error) return { error: error.message, needsConfirmation: false };
     return { error: null, needsConfirmation: data.session === null };
+  },
+  resendVerification: async (email) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo },
+    });
+    return error ? error.message : null;
+  },
+  requestPasswordReset: async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return error ? error.message : null;
+  },
+  updatePassword: async (password) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    return error ? error.message : null;
   },
   signOut: async () => {
     await supabase.auth.signOut();

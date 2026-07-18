@@ -4,6 +4,7 @@ import {
   createSupabaseClient,
   createSupabaseServiceClient,
 } from './libs/supabase';
+import { createProfileService } from './profiles/service';
 import { createServer } from './server';
 import { createUserService } from './users/service';
 
@@ -16,8 +17,9 @@ const serviceClient = createSupabaseServiceClient(
 
 const authService = createAuthService({ anonClient, serviceClient });
 const userService = createUserService({ serviceClient });
+const profileService = createProfileService({ serviceClient });
 
-const app = createServer({ authService, userService });
+const app = createServer({ authService, userService, profileService });
 
 app.listen(env.port, () => {
   console.log(`🚗 RoadMate backend listening on :${env.port}`);

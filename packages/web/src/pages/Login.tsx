@@ -32,7 +32,7 @@ export function Login() {
   };
 
   return (
-    <AuthShell title="Dobrodosao nazad" subtitle="Prijavi se na svoj racun">
+    <AuthShell title="Dobrodošao nazad" subtitle="Prijavi se na svoj račun">
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {error && <Alert kind="error">{error}</Alert>}
         <TextField
@@ -54,7 +54,10 @@ export function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
           <div className="mt-1.5 text-right">
-            <Link to="/login" className="text-brand text-xs hover:underline">
+            <Link
+              to="/forgot-password"
+              className="text-brand text-xs hover:underline"
+            >
               Zaboravljena lozinka?
             </Link>
           </div>
@@ -63,7 +66,7 @@ export function Login() {
       </form>
 
       <p className="mt-6 text-center text-slate-500 text-sm">
-        Nemas racun?{' '}
+        Nemaš račun?{' '}
         <Link
           to="/register"
           className="font-semibold text-brand hover:underline"

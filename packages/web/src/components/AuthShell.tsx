@@ -1,4 +1,5 @@
 import { type InputHTMLAttributes, type ReactNode, useState } from 'react';
+import { Logo } from '@/components/Logo';
 
 export function AuthShell({
   title,
@@ -20,12 +21,12 @@ export function AuthShell({
           aria-hidden
           className="-bottom-24 -left-16 absolute h-80 w-80 rounded-full bg-white/10 blur-3xl"
         />
-        <div className="relative z-10 text-2xl font-bold tracking-tight">
-          🚗 RoadMate
+        <div className="relative z-10">
+          <Logo size="lg" light />
         </div>
         <div className="relative z-10">
           <h1 className="font-bold text-4xl leading-tight">
-            Pomoc na cesti,
+            Pomoć na cesti,
             <br /> zajednica koja se odaziva.
           </h1>
           <p className="mt-4 max-w-md text-lg text-white/80">
@@ -38,14 +39,18 @@ export function AuthShell({
         </div>
       </div>
 
-      <div className="flex items-center justify-center bg-slate-50 p-6">
+      <div className="flex items-center justify-center bg-slate-50 p-6 dark:bg-slate-950">
         <div className="w-full max-w-md">
-          <div className="mb-6 text-center lg:hidden">
-            <span className="font-bold text-2xl text-brand">🚗 RoadMate</span>
+          <div className="mb-6 flex justify-center lg:hidden">
+            <Logo size="lg" />
           </div>
-          <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xl">
-            <h2 className="font-bold text-2xl text-slate-900">{title}</h2>
-            <p className="mt-1 text-slate-500 text-sm">{subtitle}</p>
+          <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="font-bold text-2xl text-slate-900 dark:text-slate-100">
+              {title}
+            </h2>
+            <p className="mt-1 text-slate-500 text-sm dark:text-slate-400">
+              {subtitle}
+            </p>
             <div className="mt-6">{children}</div>
           </div>
         </div>
@@ -60,11 +65,11 @@ export function TextField({
 }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block">
-      <span className="mb-1.5 block font-medium text-slate-700 text-sm">
+      <span className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
         {label}
       </span>
       <input
-        className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
+        className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
         {...props}
       />
     </label>
@@ -108,19 +113,19 @@ export function PasswordField({
   const [show, setShow] = useState(false);
   return (
     <label className="block">
-      <span className="mb-1.5 block font-medium text-slate-700 text-sm">
+      <span className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
         {label}
       </span>
       <div className="relative">
         <input
           type={show ? 'text' : 'password'}
-          className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 pr-11 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
+          className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 pr-11 text-slate-900 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
           {...props}
         />
         <button
           type="button"
           onClick={() => setShow((s) => !s)}
-          aria-label={show ? 'Sakrij lozinku' : 'Prikazi lozinku'}
+          aria-label={show ? 'Sakrij lozinku' : 'Prikaži lozinku'}
           className="-translate-y-1/2 absolute top-1/2 right-2.5 text-slate-400 transition hover:text-slate-600"
         >
           <EyeIcon off={show} />
