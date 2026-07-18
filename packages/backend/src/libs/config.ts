@@ -18,6 +18,7 @@ export const env = {
   supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
 
   jwtSecret: process.env.JWT_SECRET ?? 'change-me',
+  autoDevApiKey: process.env.AUTO_DEV_API_KEY,
 
   match: {
     radiusM: Number(process.env.MATCH_RADIUS_M ?? 15000),
