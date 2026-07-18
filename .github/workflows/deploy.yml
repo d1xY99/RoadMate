@@ -86,35 +86,51 @@ jobs:
           fi
 
           if [ "$STATUS" = "success" ]; then
-            TITLE="RoadMate $LABEL deployed"
+            TITLE="Deployment completed"
+            DESCRIPTION="RoadMate $LABEL deploy finished successfully."
+            STATE="Success"
             COLOR="3066993"
           else
-            TITLE="RoadMate $LABEL deploy failed"
+            TITLE="Deployment failed"
+            DESCRIPTION="RoadMate $LABEL deploy needs attention."
+            STATE="Failed"
             COLOR="15158332"
           fi
 
           RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          COMMIT_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
           SHORT_SHA="${GITHUB_SHA::7}"
 
           PAYLOAD="$(jq -nc \
             --arg title "$TITLE" \
+            --arg description "$DESCRIPTION" \
+            --arg state "$STATE" \
             --arg target "$TARGET" \
             --arg branch "$GITHUB_REF_NAME" \
             --arg sha "$SHORT_SHA" \
+            --arg commit_url "$COMMIT_URL" \
             --arg actor "$GITHUB_ACTOR" \
             --arg url "$RUN_URL" \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --argjson color "$COLOR" \
             '{
+              username: "RoadMate Deploy Bot",
               embeds: [{
                 title: $title,
+                description: $description,
                 color: $color,
                 fields: [
+                  { name: "Status", value: $state, inline: true },
                   { name: "Environment", value: $target, inline: true },
                   { name: "Branch", value: $branch, inline: true },
-                  { name: "Commit", value: $sha, inline: true },
-                  { name: "Actor", value: $actor, inline: true }
+                  { name: "Commit", value: ("[" + $sha + "](" + $commit_url + ")"), inline: true },
+                  { name: "Triggered by", value: $actor, inline: true },
+                  { name: "Workflow", value: ("[Open run](" + $url + ")"), inline: true }
                 ],
-                url: $url
+                url: $url,
+                footer: { text: $repo },
+                timestamp: $timestamp
               }]
             }')"
 
