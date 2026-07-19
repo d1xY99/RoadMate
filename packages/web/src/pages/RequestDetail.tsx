@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { PROBLEM_LABELS, type ProblemType } from '@/components/HelpRequestForm';
 import { Logo } from '@/components/Logo';
+import { ReportBlockActions } from '@/components/ReportBlockActions';
 import { RequestChat } from '@/components/RequestChat';
 import { RequestFeedback } from '@/components/RequestFeedback';
 import { RequestOffers } from '@/components/RequestOffers';
@@ -116,6 +117,19 @@ export function RequestDetail() {
   const uid = useAuth((s) => s.session?.user.id);
   const role: 'requester' | 'helper' =
     request?.helper_id === uid ? 'helper' : 'requester';
+  const requesterQ = useQuery({
+    queryKey: ['requester', request?.requester_id],
+    enabled: !!request?.requester_id && request?.requester_id !== uid,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', request?.requester_id as string)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as { full_name: string } | null) ?? null;
+    },
+  });
 
   const setStatus = async (status: Status) => {
     if (!request) return;
@@ -159,6 +173,12 @@ export function RequestDetail() {
 
   const meta = STATUS_META[request.status];
   const active = request.status === 'open' || request.status === 'accepted';
+  const otherUserId =
+    role === 'helper' ? request.requester_id : request.helper_id;
+  const otherUserName =
+    role === 'helper'
+      ? requesterQ.data?.full_name || 'trazitelja'
+      : helper?.full_name || 'pomagaca';
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -286,6 +306,14 @@ export function RequestDetail() {
               />
             ) : null;
           })()}
+
+        {otherUserId && (
+          <ReportBlockActions
+            requestId={request.id}
+            otherUserId={otherUserId}
+            otherUserName={otherUserName}
+          />
+        )}
 
         {/* Akcije */}
         {active && (
