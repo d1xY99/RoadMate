@@ -164,6 +164,22 @@ function MapHome() {
   });
   const helpers = helpersQ.data ?? [];
 
+  // Ukupno nepročitanih DM poruka za badge u navigaciji.
+  const conversationsQ = useQuery({
+    queryKey: ['conversations', session?.user.id],
+    enabled: !!session,
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('list_conversations');
+      if (error) throw error;
+      return data as { unread_count: number }[];
+    },
+  });
+  const unreadTotal = (conversationsQ.data ?? []).reduce(
+    (n, c) => n + Number(c.unread_count),
+    0,
+  );
+
   const email = session?.user.email ?? '';
   const initial = (email[0] ?? '?').toUpperCase();
 
@@ -194,6 +210,23 @@ function MapHome() {
               className="rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               Zahtjevi
+            </Link>
+            <Link
+              to="/friends"
+              className="hidden rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 sm:block dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              Prijatelji
+            </Link>
+            <Link
+              to="/messages"
+              className="relative rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              Poruke
+              {unreadTotal > 0 && (
+                <span className="-top-0.5 -right-0.5 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 font-bold text-[10px] text-white">
+                  {unreadTotal}
+                </span>
+              )}
             </Link>
             <Link
               to="/profile"
