@@ -85,6 +85,12 @@ export function RequestDetail() {
 
   const requestQ = useQuery({
     queryKey: ['request', id],
+    // Poll dok je zahtjev živ: druga strana vidi prihvat/završetak (i chat)
+    // bez ručnog refresha.
+    refetchInterval: (query) => {
+      const s = query.state.data?.status;
+      return s === 'open' || s === 'accepted' ? 10_000 : false;
+    },
     queryFn: async () => {
       const { data, error } = await supabase
         .from('help_requests')
@@ -255,9 +261,12 @@ export function RequestDetail() {
           />
         )}
 
-        {/* Chat (#29) — dok je pomoć aktivna */}
-        {request.status === 'accepted' && (
-          <RequestChat requestId={request.id} />
+        {/* Chat (#29) — dok je pomoć aktivna; nakon završetka samo za čitanje */}
+        {(request.status === 'accepted' || request.status === 'resolved') && (
+          <RequestChat
+            requestId={request.id}
+            readOnly={request.status !== 'accepted'}
+          />
         )}
 
         {/* Pomagač */}
