@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Logo } from '@/components/Logo';
+import { sendPush } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 type SearchRow = {
@@ -113,16 +114,27 @@ export function Friends() {
   };
 
   const sendRequest = (userId: string) =>
-    run(userId, () =>
-      supabase.rpc('send_friend_request', { p_user_id: userId }),
-    );
+    run(userId, async () => {
+      const { data, error: err } = await supabase.rpc('send_friend_request', {
+        p_user_id: userId,
+      });
+      // Edge funkcija validira stanje, pa šaljemo oba tipa: prolazi samo
+      // onaj koji odgovara stvarnom ishodu (pending ili auto-accept).
+      if (data) {
+        sendPush('friend_request', data as string);
+        sendPush('friend_accept', data as string);
+      }
+      return { error: err };
+    });
   const respond = (friendshipId: string, accept: boolean) =>
-    run(friendshipId, () =>
-      supabase.rpc('respond_friend_request', {
+    run(friendshipId, async () => {
+      const { error: err } = await supabase.rpc('respond_friend_request', {
         p_friendship_id: friendshipId,
         p_accept: accept,
-      }),
-    );
+      });
+      if (!err && accept) sendPush('friend_accept', friendshipId);
+      return { error: err };
+    });
   const remove = (userId: string) =>
     run(userId, () => supabase.rpc('remove_friend', { p_user_id: userId }));
 

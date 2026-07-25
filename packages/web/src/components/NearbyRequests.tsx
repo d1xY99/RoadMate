@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PROBLEM_LABELS, type ProblemType } from '@/components/HelpRequestForm';
+import { sendPush } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 type NearbyRequest = {
@@ -47,10 +48,11 @@ export function NearbyRequests({ center }: { center: [number, number] }) {
 
   const offer = useMutation({
     mutationFn: async (requestId: string) => {
-      const { error } = await supabase.rpc('offer_help', {
+      const { data, error } = await supabase.rpc('offer_help', {
         p_request_id: requestId,
       });
       if (error) throw error;
+      if (data) sendPush('offer', data as string);
     },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ['nearby-requests'] }),
