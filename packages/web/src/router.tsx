@@ -10,6 +10,7 @@ import { AuthConfirm } from '@/pages/AuthConfirm';
 import { DirectChat } from '@/pages/DirectChat';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Friends } from '@/pages/Friends';
+import { Heroes } from '@/pages/Heroes';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
 import { Messages } from '@/pages/Messages';
@@ -127,6 +128,16 @@ const directChatRoute = createRoute({
   ),
 });
 
+const heroesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/heroes',
+  component: () => (
+    <RequireAuth>
+      <Heroes />
+    </RequireAuth>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -141,6 +152,7 @@ const routeTree = rootRoute.addChildren([
   friendsRoute,
   messagesRoute,
   directChatRoute,
+  heroesRoute,
 ]);
 
 export const router = createRouter({ routeTree });
