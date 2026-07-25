@@ -218,6 +218,12 @@ function MapHome() {
               Prijatelji
             </Link>
             <Link
+              to="/heroes"
+              className="hidden rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 sm:block dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              Heroji
+            </Link>
+            <Link
               to="/messages"
               className="relative rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             >
