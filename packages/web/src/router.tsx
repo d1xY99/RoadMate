@@ -4,12 +4,14 @@ import {
   createRouter,
   Outlet,
 } from '@tanstack/react-router';
+import { GlobalRealtime } from '@/components/GlobalRealtime';
 import { RequireAuth } from '@/components/RequireAuth';
 import { AdminDashboard } from '@/pages/AdminDashboard';
 import { AuthConfirm } from '@/pages/AuthConfirm';
 import { DirectChat } from '@/pages/DirectChat';
 import { ForgotPassword } from '@/pages/ForgotPassword';
 import { Friends } from '@/pages/Friends';
+import { Heroes } from '@/pages/Heroes';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
 import { Messages } from '@/pages/Messages';
@@ -19,7 +21,14 @@ import { Register } from '@/pages/Register';
 import { RequestDetail } from '@/pages/RequestDetail';
 import { ResetPassword } from '@/pages/ResetPassword';
 
-const rootRoute = createRootRoute({ component: () => <Outlet /> });
+const rootRoute = createRootRoute({
+  component: () => (
+    <>
+      <GlobalRealtime />
+      <Outlet />
+    </>
+  ),
+});
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -127,6 +136,16 @@ const directChatRoute = createRoute({
   ),
 });
 
+const heroesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/heroes',
+  component: () => (
+    <RequireAuth>
+      <Heroes />
+    </RequireAuth>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -141,6 +160,7 @@ const routeTree = rootRoute.addChildren([
   friendsRoute,
   messagesRoute,
   directChatRoute,
+  heroesRoute,
 ]);
 
 export const router = createRouter({ routeTree });

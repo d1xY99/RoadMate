@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/lib/auth';
+import { sendPush } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 type Message = {
@@ -81,16 +82,21 @@ export function RequestChat({
     if (!text || !uid) return;
     setSending(true);
     setSendError(null);
-    const { error } = await supabase.from('request_messages').insert({
-      request_id: requestId,
-      sender_id: uid,
-      body: text,
-    });
+    const { data, error } = await supabase
+      .from('request_messages')
+      .insert({
+        request_id: requestId,
+        sender_id: uid,
+        body: text,
+      })
+      .select('id')
+      .single();
     setSending(false);
     if (error) {
       setSendError('Poruka nije poslana. Pokušaj ponovo.');
       return;
     }
+    if (data) sendPush('request_message', data.id);
     setBody('');
     queryClient.invalidateQueries({ queryKey: ['messages', requestId] });
   };

@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { sendPush } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 type Offer = {
@@ -53,10 +54,11 @@ export function RequestOffers({
 
   const accept = useMutation({
     mutationFn: async (offerId: string) => {
-      const { error } = await supabase.rpc('accept_offer', {
+      const { data, error } = await supabase.rpc('accept_offer', {
         p_offer_id: offerId,
       });
       if (error) throw error;
+      if (data) sendPush('accepted', data as string);
     },
     onSuccess: onAccepted,
   });

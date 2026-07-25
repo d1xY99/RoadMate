@@ -11,6 +11,7 @@ import {
 import { Alert, TextField } from '@/components/AuthShell';
 import { HelperToggle } from '@/components/HelperToggle';
 import { Logo } from '@/components/Logo';
+import { PushSettings } from '@/components/PushSettings';
 import { ThemePicker } from '@/components/ThemePicker';
 import { VignetteSection } from '@/components/VignetteSection';
 import { useAuth } from '@/lib/auth';
@@ -815,6 +816,8 @@ export function Profile() {
         </section>
 
         <VignetteSection />
+
+        <PushSettings />
 
         <ThemePicker />
       </main>

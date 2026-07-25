@@ -49,3 +49,4 @@ coverage
 
 # Claude
 .claude/
+supabase/functions/.env

@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from 'react';
+import { sendPush } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 export type ProblemType =
@@ -42,7 +43,7 @@ export function HelpRequestForm({
     setError(null);
     setSending(true);
     const [lng, lat] = center;
-    const { error: err } = await supabase.rpc('create_help_request', {
+    const { data, error: err } = await supabase.rpc('create_help_request', {
       p_type: type,
       p_description: description.trim() || null,
       lat,
@@ -53,6 +54,7 @@ export function HelpRequestForm({
       setError('Slanje nije uspjelo. Pokušaj ponovo.');
       return;
     }
+    if (data) sendPush('new_request', data as string);
     onCreated();
   };
 
