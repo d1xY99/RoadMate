@@ -12,6 +12,7 @@ import { Alert, TextField } from '@/components/AuthShell';
 import { HelperToggle } from '@/components/HelperToggle';
 import { Logo } from '@/components/Logo';
 import { ThemePicker } from '@/components/ThemePicker';
+import { VignetteSection } from '@/components/VignetteSection';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import {
@@ -629,6 +630,77 @@ export function Profile() {
           </div>
         </div>
 
+        {/* Podaci */}
+        <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
+            Moji podaci
+          </h2>
+          <p className="mt-0.5 text-slate-500 text-sm dark:text-slate-400">
+            Vidi i ažuriraj svoje podatke.
+          </p>
+
+          <form onSubmit={onSave} className="mt-5 flex flex-col gap-4">
+            {error && <Alert kind="error">{error}</Alert>}
+            {ok && <Alert kind="success">Sačuvano.</Alert>}
+
+            <TextField
+              label="Ime i prezime"
+              type="text"
+              autoComplete="name"
+              placeholder="Marko Marković"
+              required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+            <TextField
+              label="Telefon"
+              type="tel"
+              autoComplete="tel"
+              placeholder="+387 6x xxx xxx"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+
+            <fieldset>
+              <legend className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
+                Tip vozila
+              </legend>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {VEHICLES.map((v) => {
+                  const active = vehicleType === v.value;
+                  return (
+                    <button
+                      type="button"
+                      key={v.value}
+                      onClick={() => setVehicleType(active ? '' : v.value)}
+                      aria-pressed={active}
+                      className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-sm transition ${
+                        active
+                          ? 'border-brand bg-brand/5 font-semibold text-brand ring-2 ring-brand/20'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      <VehicleIcon type={v.value} />
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand font-semibold text-sm text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {saving && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              )}
+              Sačuvaj
+            </button>
+          </form>
+        </div>
+
         <div className="mt-6">
           <HelperToggle />
         </div>
@@ -742,76 +814,7 @@ export function Profile() {
           )}
         </section>
 
-        {/* Podaci */}
-        <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
-            Moji podaci
-          </h2>
-          <p className="mt-0.5 text-slate-500 text-sm dark:text-slate-400">
-            Vidi i ažuriraj svoje podatke.
-          </p>
-
-          <form onSubmit={onSave} className="mt-5 flex flex-col gap-4">
-            {error && <Alert kind="error">{error}</Alert>}
-            {ok && <Alert kind="success">Sačuvano.</Alert>}
-
-            <TextField
-              label="Ime i prezime"
-              type="text"
-              autoComplete="name"
-              placeholder="Marko Marković"
-              required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-            <TextField
-              label="Telefon"
-              type="tel"
-              autoComplete="tel"
-              placeholder="+387 6x xxx xxx"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-
-            <fieldset>
-              <legend className="mb-1.5 block font-medium text-slate-700 text-sm dark:text-slate-300">
-                Tip vozila
-              </legend>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {VEHICLES.map((v) => {
-                  const active = vehicleType === v.value;
-                  return (
-                    <button
-                      type="button"
-                      key={v.value}
-                      onClick={() => setVehicleType(active ? '' : v.value)}
-                      aria-pressed={active}
-                      className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-sm transition ${
-                        active
-                          ? 'border-brand bg-brand/5 font-semibold text-brand ring-2 ring-brand/20'
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      <VehicleIcon type={v.value} />
-                      {v.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </fieldset>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand font-semibold text-sm text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {saving && (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-              )}
-              Sačuvaj
-            </button>
-          </form>
-        </div>
+        <VignetteSection />
 
         <ThemePicker />
       </main>
