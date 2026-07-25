@@ -7,9 +7,12 @@ import {
 import { RequireAuth } from '@/components/RequireAuth';
 import { AdminDashboard } from '@/pages/AdminDashboard';
 import { AuthConfirm } from '@/pages/AuthConfirm';
+import { DirectChat } from '@/pages/DirectChat';
 import { ForgotPassword } from '@/pages/ForgotPassword';
+import { Friends } from '@/pages/Friends';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
+import { Messages } from '@/pages/Messages';
 import { MyRequests } from '@/pages/MyRequests';
 import { Profile } from '@/pages/Profile';
 import { Register } from '@/pages/Register';
@@ -94,6 +97,36 @@ const myRequestsRoute = createRoute({
   ),
 });
 
+const friendsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/friends',
+  component: () => (
+    <RequireAuth>
+      <Friends />
+    </RequireAuth>
+  ),
+});
+
+const messagesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/messages',
+  component: () => (
+    <RequireAuth>
+      <Messages />
+    </RequireAuth>
+  ),
+});
+
+const directChatRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/messages/$userId',
+  component: () => (
+    <RequireAuth>
+      <DirectChat />
+    </RequireAuth>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
@@ -105,6 +138,9 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   requestDetailRoute,
   myRequestsRoute,
+  friendsRoute,
+  messagesRoute,
+  directChatRoute,
 ]);
 
 export const router = createRouter({ routeTree });
