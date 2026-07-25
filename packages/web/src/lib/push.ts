@@ -103,7 +103,11 @@ export function sendPush(
     | 'friend_accept',
   id: string,
 ): void {
-  supabase.functions.invoke('push', { body: { type, id } }).catch(() => {
-    // push je best-effort; realtime/poll su primarni kanal u aplikaciji
-  });
+  // push je best-effort; realtime/poll su primarni kanal u aplikaciji, pa
+  // nijedna greška (ni sinhrona) ne smije srušiti akciju koja ga je okinula
+  try {
+    supabase.functions.invoke('push', { body: { type, id } }).catch(() => {});
+  } catch {
+    // namjerno progutano
+  }
 }
