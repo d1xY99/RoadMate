@@ -13,6 +13,8 @@ type Row = {
   type: ProblemType;
   status: Status;
   created_at: string;
+  requester_id: string;
+  helper_id: string | null;
 };
 
 const STATUS_META: Record<Status, { label: string; badge: string }> = {
@@ -35,6 +37,7 @@ const fmtDate = (s: string) =>
 
 const TABS = [
   { key: 'active', label: 'Aktivni' },
+  { key: 'helping', label: 'Pomažem' },
   { key: 'done', label: 'Završeni' },
 ] as const;
 type Tab = (typeof TABS)[number]['key'];
@@ -49,17 +52,21 @@ export function MyRequests() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('help_requests')
-        .select('id, type, status, created_at')
-        .eq('requester_id', uid as string)
+        .select('id, type, status, created_at, requester_id, helper_id')
+        .or(`requester_id.eq.${uid},helper_id.eq.${uid}`)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as Row[];
     },
   });
 
-  const rows = (listQ.data ?? []).filter((r) =>
-    tab === 'active' ? ACTIVE.includes(r.status) : !ACTIVE.includes(r.status),
-  );
+  const rows = (listQ.data ?? []).filter((r) => {
+    if (tab === 'active')
+      return ACTIVE.includes(r.status) && r.requester_id === uid;
+    if (tab === 'helping')
+      return ACTIVE.includes(r.status) && r.helper_id === uid;
+    return !ACTIVE.includes(r.status);
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -106,9 +113,9 @@ export function MyRequests() {
           )}
           {!listQ.isLoading && rows.length === 0 && (
             <p className="py-10 text-center text-slate-400 text-sm">
-              {tab === 'active'
-                ? 'Nemaš aktivnih zahtjeva.'
-                : 'Nemaš završenih zahtjeva.'}
+              {tab === 'active' && 'Nemaš aktivnih zahtjeva.'}
+              {tab === 'helping' && 'Trenutno nikome ne pomažeš.'}
+              {tab === 'done' && 'Nemaš završenih zahtjeva.'}
             </p>
           )}
           {rows.map((r) => {
@@ -123,6 +130,11 @@ export function MyRequests() {
                 <div>
                   <div className="font-semibold text-slate-900 dark:text-slate-100">
                     {PROBLEM_LABELS[r.type]}
+                    {r.helper_id === uid && (
+                      <span className="ml-2 rounded-full bg-indigo-100 px-2 py-0.5 font-semibold text-[10px] text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                        Pomagač
+                      </span>
+                    )}
                   </div>
                   <div className="mt-0.5 text-slate-500 text-xs dark:text-slate-400">
                     {fmtDate(r.created_at)}
