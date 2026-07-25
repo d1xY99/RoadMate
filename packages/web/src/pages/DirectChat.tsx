@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from '@tanstack/react-router';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/lib/auth';
+import { sendPush } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 type Message = {
@@ -107,11 +108,15 @@ export function DirectChat() {
     if (!text || !uid) return;
     setSending(true);
     setSendError(null);
-    const { error } = await supabase.from('direct_messages').insert({
-      sender_id: uid,
-      recipient_id: partnerId,
-      body: text,
-    });
+    const { data, error } = await supabase
+      .from('direct_messages')
+      .insert({
+        sender_id: uid,
+        recipient_id: partnerId,
+        body: text,
+      })
+      .select('id')
+      .single();
     setSending(false);
     if (error) {
       setSendError(
@@ -119,6 +124,7 @@ export function DirectChat() {
       );
       return;
     }
+    if (data) sendPush('dm', data.id);
     setBody('');
     queryClient.invalidateQueries({ queryKey: ['dm', partnerId] });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });

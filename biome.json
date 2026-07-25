@@ -16,7 +16,8 @@
       "!**/coverage",
       "!**/*.min.js",
       "!**/*.svg",
-      "!**/*.css"
+      "!**/*.css",
+      "!supabase/functions"
     ]
   },
   "formatter": {

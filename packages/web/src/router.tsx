@@ -4,6 +4,7 @@ import {
   createRouter,
   Outlet,
 } from '@tanstack/react-router';
+import { GlobalRealtime } from '@/components/GlobalRealtime';
 import { RequireAuth } from '@/components/RequireAuth';
 import { AdminDashboard } from '@/pages/AdminDashboard';
 import { AuthConfirm } from '@/pages/AuthConfirm';
@@ -20,7 +21,14 @@ import { Register } from '@/pages/Register';
 import { RequestDetail } from '@/pages/RequestDetail';
 import { ResetPassword } from '@/pages/ResetPassword';
 
-const rootRoute = createRootRoute({ component: () => <Outlet /> });
+const rootRoute = createRootRoute({
+  component: () => (
+    <>
+      <GlobalRealtime />
+      <Outlet />
+    </>
+  ),
+});
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
